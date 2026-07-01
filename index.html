@@ -1,793 +1,904 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PMG6YSH2KN"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-PMG6YSH2KN');
-</script>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>구독 영수증 설계기</title>
+<title>내 구독 설계기</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{--paper:#F3EEE2;--ink:#262218;--soft:#6E6555;--stamp:#B23A2E;--pen:#2E4A5E;--green:#3F6F52;--marker:#E3B23C;--line:#D8D0BC;}
 *{box-sizing:border-box;}html,body{margin:0;padding:0;}
-body{background:radial-gradient(ellipse at 50% 0%,#2A3136,#1C2227 60%);font-family:'IBM Plex Sans KR',sans-serif;color:var(--ink);min-height:100vh;padding:48px 16px 80px;}
+body{background:radial-gradient(ellipse at 50% 0%,#2A3136,#1C2227 60%);font-family:'IBM Plex Sans KR',sans-serif;color:var(--ink);min-height:100vh;padding:40px 16px 80px;}
 .stage{max-width:580px;margin:0 auto;}
 .torn{height:14px;background:var(--paper);}
 .torn-top{clip-path:polygon(0% 100%,4% 0%,8% 100%,12% 0%,16% 100%,20% 0%,24% 100%,28% 0%,32% 100%,36% 0%,40% 100%,44% 0%,48% 100%,52% 0%,56% 100%,60% 0%,64% 100%,68% 0%,72% 100%,76% 0%,80% 100%,84% 0%,88% 100%,92% 0%,96% 100%,100% 0%);filter:drop-shadow(0 6px 6px #00000055);}
 .torn-bottom{clip-path:polygon(0% 0%,4% 100%,8% 0%,12% 100%,16% 0%,20% 100%,24% 0%,28% 100%,32% 0%,36% 100%,40% 0%,44% 100%,48% 0%,52% 100%,56% 0%,60% 100%,64% 0%,68% 100%,72% 0%,76% 100%,80% 0%,84% 100%,88% 0%,92% 100%,96% 0%,100% 100%);}
-.receipt{background:var(--paper);padding:34px 26px 8px;box-shadow:0 30px 60px -20px #00000080;}
-.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--soft);display:flex;justify-content:space-between;margin-bottom:18px;}
-h1{font-size:26px;line-height:1.32;margin:0 0 8px;font-weight:700;letter-spacing:-.01em;}
-.sub{font-size:14px;color:var(--soft);margin:0 0 20px;line-height:1.55;}
-.barcode{height:20px;margin:0 0 8px;opacity:.85;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 9px,var(--ink) 9px 13px,transparent 13px 16px,var(--ink) 16px 17px,transparent 17px 23px,var(--ink) 23px 25px,transparent 25px 29px);}
-.slabel{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--stamp);font-weight:600;letter-spacing:.03em;margin:26px 0 12px;}
-.slabel.m{color:var(--soft);}
+.receipt{background:var(--paper);padding:32px 24px 10px;box-shadow:0 30px 60px -20px #00000080;}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--soft);display:flex;justify-content:space-between;margin-bottom:16px;}
+h1{font-size:24px;line-height:1.3;margin:0 0 8px;font-weight:700;}
+.sub{font-size:13.5px;color:var(--soft);margin:0 0 18px;line-height:1.55;}
+.hl{color:var(--stamp);}
+.barcode{height:18px;margin:0 0 8px;opacity:.8;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 9px,var(--ink) 9px 13px,transparent 13px 16px,var(--ink) 16px 17px,transparent 17px 23px,var(--ink) 23px 25px,transparent 25px 29px);}
+.sl{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--stamp);font-weight:600;letter-spacing:.03em;margin:24px 0 10px;}
+.sl.m{color:var(--soft);}
+/* presets */
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.preset{border:1.5px solid var(--line);background:none;padding:8px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;font-family:'IBM Plex Sans KR';color:var(--soft);transition:all .15s;}
+.preset:hover,.preset.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.preset-comment{font-size:12px;color:var(--pen);margin-bottom:12px;font-style:italic;min-height:16px;}
+/* search */
 .sw{position:relative;margin-bottom:8px;}
-.sw::before{content:"⌕";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--soft);}
-.sw input{width:100%;padding:11px 14px 11px 36px;border:1.5px solid var(--line);border-radius:4px;background:#FFFEFA;font-family:'IBM Plex Sans KR';font-size:14px;color:var(--ink);outline:none;}
+.sw::before{content:"⌕";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--soft);}
+.sw input{width:100%;padding:10px 14px 10px 34px;border:1.5px solid var(--line);border-radius:4px;background:#FFFEFA;font-family:'IBM Plex Sans KR';font-size:14px;color:var(--ink);outline:none;}
 .sw input:focus{border-color:var(--pen);}
-.pick-bar{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--soft);margin-bottom:14px;}
-/* category */
+.pb{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--soft);margin-bottom:12px;}
+/* cat */
 .cat{border-bottom:1px solid var(--line);}
-.cat-h{display:flex;justify-content:space-between;align-items:center;padding:11px 2px;cursor:pointer;user-select:none;}
+.cat-h{display:flex;justify-content:space-between;align-items:center;padding:10px 2px;cursor:pointer;user-select:none;}
 .cat-h .cn{font-weight:700;font-size:14px;}
 .cat-h .cm{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--soft);display:flex;align-items:center;gap:5px;}
 .chev{font-size:10px;transition:transform .2s;}
 .cat.op .chev{transform:rotate(90deg);}
-.cat-b{display:none;padding:4px 0 12px;}
+.cat-b{display:none;padding:4px 0 10px;}
 .cat.op .cat-b{display:block;}
-/* service card */
-.svc{background:#FFFEFA;border:1.5px solid var(--line);border-radius:5px;padding:11px 13px;margin-bottom:7px;cursor:pointer;transition:border-color .12s,box-shadow .12s;}
-.svc:hover{border-color:#b8b0a0;}
+/* svc card */
+.svc{background:#FFFEFA;border:1.5px solid var(--line);border-radius:5px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:border-color .12s,box-shadow .12s;}
 .svc.on{border-color:var(--pen);box-shadow:inset 3px 0 0 var(--pen);}
-.sv-top{display:flex;align-items:flex-start;gap:10px;}
-.sv-chk{width:18px;height:18px;border:1.5px solid var(--soft);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;}
+.sv-top{display:flex;align-items:flex-start;gap:9px;}
+.sv-chk{width:17px;height:17px;border:1.5px solid var(--soft);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700;}
 .svc.on .sv-chk{background:var(--pen);border-color:var(--pen);}
 .sv-info{flex:1;min-width:0;}
 .sv-name{font-weight:600;font-size:14px;}
-.sv-desc{font-size:11.5px;color:var(--soft);margin-top:2px;line-height:1.4;}
-.sv-price{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;text-align:right;white-space:nowrap;}
+.sv-desc{font-size:11px;color:var(--soft);margin-top:1px;line-height:1.4;}
+.sv-price{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;text-align:right;white-space:nowrap;}
 .sv-price small{display:block;font-size:10px;color:var(--soft);font-weight:400;}
-.sv-detail{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+.sv-detail{display:none;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);}
 .svc.on .sv-detail{display:block;}
-.tiers{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
-.tier{font-size:12px;font-family:'IBM Plex Mono',monospace;border:1px solid var(--line);border-radius:18px;padding:4px 10px;cursor:pointer;color:var(--soft);background:transparent;}
+.sv-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.sv-tab{font-size:12px;font-family:'IBM Plex Mono',monospace;border:1px solid var(--line);border-radius:3px;padding:4px 10px;cursor:pointer;color:var(--soft);background:transparent;}
+.sv-tab.on{background:var(--pen);color:#fff;border-color:var(--pen);}
+.tiers{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.tier{font-size:12px;font-family:'IBM Plex Mono',monospace;border:1px solid var(--line);border-radius:18px;padding:4px 10px;cursor:pointer;color:var(--soft);}
 .tier.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
 .pe{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
-.pe label{font-size:11.5px;color:var(--soft);white-space:nowrap;}
-.pe input{width:100px;border:none;border-bottom:1.5px solid var(--line);background:transparent;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:right;padding:3px 2px;color:var(--ink);outline:none;flex-shrink:0;}
-.pe input:focus{border-color:var(--pen);}
+.pe label{font-size:11px;color:var(--soft);white-space:nowrap;}
+.pe input{width:100px;border:none;border-bottom:1.5px solid var(--line);background:transparent;font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:right;padding:3px 2px;color:var(--ink);outline:none;}
 .pe .unit{font-size:12px;color:var(--soft);}
-.sv-note{font-size:11.5px;color:var(--stamp);line-height:1.45;margin-top:5px;}
+.sv-note{font-size:11px;color:var(--stamp);margin-top:4px;line-height:1.45;}
+/* benefit panel */
+.benefit-panel{background:#f8f5ec;border-radius:4px;padding:10px 12px;font-size:12.5px;line-height:1.6;color:#3A352A;}
+.benefit-panel .bt{font-weight:700;margin-bottom:6px;font-size:13px;}
+.tier-row-info{display:flex;gap:6px;align-items:flex-start;padding:4px 0;border-bottom:1px dashed var(--line);}
+.tier-row-info:last-of-type{border:none;}
+.tri-name{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;white-space:nowrap;min-width:70px;color:var(--pen);}
+.tri-feat{flex:1;font-size:11px;color:var(--soft);}
+.tri-rec{font-size:10.5px;color:var(--stamp);margin-top:1px;}
+.tip-line{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11.5px;color:var(--pen);}
+.who-for{margin-top:6px;font-size:11.5px;color:var(--soft);}
 /* custom */
-.cust-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line);}
-.cust-row input[type=text]{flex:1;border:none;border-bottom:1px solid var(--line);background:transparent;font-size:14px;padding:3px 2px;font-family:'IBM Plex Sans KR';}
-.cust-row input[type=number]{width:90px;border:none;border-bottom:1px solid var(--line);background:transparent;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:14px;padding:3px 2px;}
-.cust-row button{border:none;background:none;color:var(--stamp);font-size:16px;cursor:pointer;padding:0 2px;}
-.add-btn{margin-top:8px;border:1px dashed var(--soft);background:none;color:var(--soft);font-size:12.5px;padding:7px 12px;border-radius:20px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
-.add-btn:hover{border-color:var(--ink);color:var(--ink);}
+.cust-row{display:flex;gap:8px;align-items:center;padding:6px 0;}
+.cust-row input[type=text]{flex:1;border:none;border-bottom:1px solid var(--line);background:transparent;font-size:13px;padding:3px 2px;font-family:'IBM Plex Sans KR';}
+.cust-row input[type=number]{width:85px;border:none;border-bottom:1px solid var(--line);background:transparent;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;padding:3px 2px;}
+.cust-row button{border:none;background:none;color:var(--stamp);font-size:15px;cursor:pointer;}
+.add-btn{margin-top:8px;border:1px dashed var(--soft);background:none;color:var(--soft);font-size:12px;padding:6px 12px;border-radius:20px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
 /* gates */
 .gate{opacity:0;pointer-events:none;max-height:0;overflow:hidden;transition:opacity .3s,max-height .35s;}
 .gate.op{opacity:1;pointer-events:auto;max-height:400px;}
-.sg{display:grid;gap:8px;}
+.sg{display:grid;gap:7px;}
 .g5{grid-template-columns:repeat(5,1fr);}
 .g3{grid-template-columns:repeat(3,1fr);}
-.sb{border:1.5px solid var(--line);background:transparent;padding:11px 4px;font-family:'IBM Plex Sans KR';font-weight:600;font-size:13px;border-radius:3px;cursor:pointer;color:var(--ink);transition:all .12s;}
+.sb{border:1.5px solid var(--line);background:transparent;padding:10px 4px;font-family:'IBM Plex Sans KR';font-weight:600;font-size:13px;border-radius:3px;cursor:pointer;color:var(--ink);transition:all .12s;}
 .sb.on{background:var(--pen);border-color:var(--pen);color:#F3EEE2;}
-.c-help{font-size:11.5px;color:var(--soft);margin-top:10px;line-height:1.55;}
+.c-help{font-size:11px;color:var(--soft);margin-top:8px;line-height:1.55;}
 /* CTA */
-.cta{width:100%;margin:24px 0 6px;padding:15px;background:var(--stamp);color:#F3EEE2;border:none;border-radius:3px;font-size:15px;font-weight:700;letter-spacing:.02em;cursor:pointer;font-family:'IBM Plex Sans KR';box-shadow:0 4px 0 #7C2A21;transition:transform .08s,box-shadow .08s;}
+.cta{width:100%;margin:22px 0 6px;padding:14px;background:var(--stamp);color:#F3EEE2;border:none;border-radius:3px;font-size:15px;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans KR';box-shadow:0 4px 0 #7C2A21;transition:transform .08s,box-shadow .08s;}
 .cta:active{transform:translateY(4px);box-shadow:none;}
 .cta:disabled{background:#B8AE98;box-shadow:0 4px 0 #989076;cursor:not-allowed;}
-/* results */
-.rzone{display:none;}
-.rzone.show{display:block;}
-.st-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);gap:8px;font-size:13.5px;}
-.st-row:last-child{border-bottom:none;}
-.st-nm{flex:1;}
-.st-pr{font-family:'IBM Plex Mono',monospace;font-weight:600;white-space:nowrap;}
-.st-cancel{font-size:11px;color:var(--pen);text-decoration:underline;white-space:nowrap;flex-shrink:0;}
-.totals{margin-top:18px;padding-top:14px;border-top:3px double var(--ink);}
-.tl{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;padding:4px 0;color:var(--soft);font-size:14px;}
-.tl.month{font-size:20px;font-weight:700;color:var(--ink);margin-top:6px;}
-.tl.year{color:var(--stamp);font-weight:600;font-size:15px;}
-/* stamp */
-.stamp-wrap{text-align:center;margin:26px 0;}
-.stamp{display:inline-block;border:4px double var(--stamp);border-radius:14px;color:var(--stamp);padding:13px 22px;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;letter-spacing:.04em;transform:rotate(-5deg);opacity:0;}
+.cta.sec{background:var(--pen);box-shadow:0 4px 0 #1e3040;}
+.cta.sec:active{box-shadow:none;}
+.back-btn{background:none;border:1.5px solid var(--line);color:var(--soft);width:100%;padding:12px;border-radius:3px;font-size:14px;cursor:pointer;font-family:'IBM Plex Sans KR';margin-bottom:8px;}
+/* step hidden */
+.step{display:none;}
+.step.show{display:block;}
+/* step 2 - results */
+.type-card{background:var(--pen);color:#fff;border-radius:8px;padding:22px;text-align:center;margin-bottom:18px;}
+.type-emoji{font-size:48px;display:block;margin-bottom:8px;}
+.type-name{font-size:22px;font-weight:700;margin-bottom:6px;}
+.type-desc{font-size:13px;opacity:.85;line-height:1.5;}
+.cat-breakdown{margin-bottom:18px;}
+.cb-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px;}
+.cb-row:last-child{border:none;}
+.cb-name{flex:1;}
+.cb-bar{height:6px;background:var(--line);border-radius:3px;flex:2;overflow:hidden;}
+.cb-fill{height:100%;background:var(--pen);border-radius:3px;transition:width .5s;}
+.cb-fill.ai{background:var(--stamp);}
+.cb-amt{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;white-space:nowrap;}
+.cb-pct{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--soft);white-space:nowrap;min-width:35px;text-align:right;}
+.totals2{padding:14px 0;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);margin-bottom:18px;}
+.tl{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;padding:3px 0;color:var(--soft);font-size:13.5px;}
+.tl.big{font-size:19px;font-weight:700;color:var(--ink);margin-top:4px;}
+.tl.yr{color:var(--stamp);font-weight:600;font-size:14px;}
+.plan-box{background:#FFFEFA;border:1px solid var(--line);border-radius:5px;overflow:hidden;margin-bottom:12px;}
+.plan-hd{padding:12px 16px;color:#fff;display:flex;align-items:center;gap:10px;}
+.plan-hd .ptag{font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:.85;}
+.plan-hd .ptitle{font-weight:700;font-size:14px;}
+.plan-cheap .plan-hd{background:var(--green);}
+.plan-rich .plan-hd{background:var(--pen);}
+.plan-bd{padding:6px 16px 10px;}
+.plan-bd ul{margin:0;padding:0;list-style:none;}
+.plan-bd li{font-size:12.5px;line-height:1.55;padding:7px 0 7px 14px;position:relative;color:#3A352A;border-bottom:1px dashed var(--line);}
+.plan-bd li:last-child{border:none;}
+.plan-bd li::before{content:"›";position:absolute;left:0;color:var(--stamp);font-weight:700;}
+.saving-highlight{background:var(--marker);color:var(--ink);padding:2px 6px;border-radius:3px;font-weight:700;font-size:12px;}
+/* step 3 - share */
+.msg-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.msg-tab{border:1.5px solid var(--line);background:none;padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;font-family:'IBM Plex Sans KR';color:var(--soft);}
+.msg-tab.on{background:var(--ink);color:#F3EEE2;border-color:var(--ink);}
+.msg-options{display:grid;gap:8px;margin-bottom:18px;}
+.msg-opt{border:1.5px solid var(--line);background:#FFFEFA;padding:12px 14px;border-radius:5px;font-size:14px;cursor:pointer;font-family:'IBM Plex Sans KR';text-align:left;color:var(--ink);transition:all .12s;}
+.msg-opt.on{border-color:var(--stamp);box-shadow:inset 3px 0 0 var(--stamp);}
+/* share preview */
+.share-preview-wrap{display:flex;justify-content:center;margin-bottom:18px;}
+#shareCard{width:360px;background:var(--paper);padding:28px 24px;font-family:'IBM Plex Sans KR',sans-serif;border-radius:8px;}
+.sc-emoji{font-size:44px;text-align:center;display:block;margin-bottom:6px;}
+.sc-type{font-size:20px;font-weight:700;text-align:center;color:var(--ink);}
+.sc-desc{font-size:12px;color:var(--soft);text-align:center;margin-top:4px;line-height:1.4;}
+.sc-divider{border:none;border-top:2px dashed var(--line);margin:16px 0;}
+.sc-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
+.sc-row .lbl{color:var(--soft);}
+.sc-row .val{font-family:'IBM Plex Mono',monospace;font-weight:700;}
+.sc-row .val.red{color:var(--stamp);}
+.sc-saving{background:var(--pen);color:#fff;border-radius:6px;padding:10px 14px;margin:14px 0;font-size:12.5px;line-height:1.5;text-align:center;}
+.sc-msg{border:2.5px solid var(--stamp);color:var(--stamp);border-radius:6px;padding:11px;font-size:15px;font-weight:700;text-align:center;margin-top:4px;}
+.sc-footer{font-size:10px;color:var(--soft);text-align:center;margin-top:12px;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;}
+/* misc */
+.rep-btn{width:100%;margin-top:14px;padding:11px;background:none;border:1.5px dashed var(--soft);border-radius:4px;color:var(--soft);font-size:13px;cursor:pointer;font-family:'IBM Plex Sans KR';}
+.rep-btn:hover{border-color:var(--pen);color:var(--pen);}
+.fp{margin-top:20px;padding-top:14px;border-top:1px dashed var(--line);font-size:11px;color:var(--soft);line-height:1.6;}
+.ty{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--soft);margin-top:16px;padding-bottom:6px;}
+.stamp-wrap{text-align:center;margin:18px 0;}
+.stamp{display:inline-block;border:4px double var(--stamp);border-radius:14px;color:var(--stamp);padding:12px 20px;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;letter-spacing:.04em;transform:rotate(-5deg);opacity:0;}
 .stamp.show{animation:sIn .45s ease-out forwards;}
 .stamp .big{font-size:20px;display:block;margin-top:4px;}
 @keyframes sIn{0%{opacity:0;transform:rotate(-5deg) scale(1.7);}55%{opacity:1;transform:rotate(-5deg) scale(.93);}100%{opacity:1;transform:rotate(-5deg) scale(1);}}
-/* plans */
-.twin{display:grid;gap:14px;}
-.plan{background:#FFFEFA;border:1px solid var(--line);border-radius:5px;overflow:hidden;}
-.plan-h{padding:13px 16px;color:#fff;}
-.plan-h .ptag{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;opacity:.85;}
-.plan-h .ptitle{font-weight:700;font-size:15px;margin-top:2px;}
-.plan-cheap .plan-h{background:var(--green);}
-.plan-rich .plan-h{background:var(--pen);}
-.plan-b{padding:4px 16px 8px;}
-.plan-b ul{margin:0;padding:0;list-style:none;}
-.plan-b li{font-size:13px;line-height:1.55;padding:8px 0 8px 16px;position:relative;color:#3A352A;border-bottom:1px dashed var(--line);}
-.plan-b li:last-child{border-bottom:none;}
-.plan-b li::before{content:"›";position:absolute;left:0;color:var(--stamp);font-weight:700;}
-.rep-btn{width:100%;margin-top:16px;padding:12px;background:none;border:1.5px dashed var(--soft);border-radius:4px;color:var(--soft);font-size:13px;cursor:pointer;font-family:'IBM Plex Sans KR';}
-.rep-btn:hover{border-color:var(--pen);color:var(--pen);}
-.fp{margin-top:22px;padding-top:16px;border-top:1px dashed var(--line);font-size:11px;color:var(--soft);line-height:1.6;}
-.ty{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--soft);margin-top:18px;padding-bottom:6px;}
-@media(max-width:430px){.receipt{padding:26px 16px 8px;}h1{font-size:22px;}.g5{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:430px){.receipt{padding:24px 14px 8px;}h1{font-size:21px;}.g5{grid-template-columns:repeat(3,1fr);}#shareCard{width:300px;}}
 </style>
 </head>
 <body>
 <div class="stage">
 <div class="torn torn-top"></div>
 <div class="receipt">
-  <div class="eyebrow"><span>구독 설계 견적서 No. 0042</span><span id="today"></span></div>
-  <h1>내 구독 전부,<br>한 장에 정리하기</h1>
-  <p class="sub">쓰는 서비스를 다 골라보면 한 달·일 년에 얼마 나가는지 보이고, 더 싸게 쓰는 법까지 알려드려요.</p>
-  <div class="barcode"></div>
+  <div class="eyebrow"><span>구독 설계 견적서 No.0042</span><span id="today"></span></div>
 
-  <div class="slabel">01 — 쓰는 서비스를 모두 골라보세요</div>
-  <div class="sw"><input type="text" id="srch" placeholder="서비스 검색 (예: 넷플, 게임, AI)"></div>
-  <div class="pick-bar" id="pickBar">선택 0개 · 월 0원</div>
-  <div id="catalog"></div>
-  <div style="margin-top:8px;">
-    <div id="custRows"></div>
-    <button class="add-btn" id="addCust">+ 목록에 없는 서비스 직접 추가</button>
+  <!-- STEP 1 -->
+  <div id="s1" class="step show">
+    <h1>AI 구독만 4개면 <span class="hl">월 14만원.</span><br>내 구독 총액은?</h1>
+    <p class="sub">쓰는 서비스를 다 골라보면 내 구독 유형과 절약법을 알려드려요.</p>
+    <div class="barcode"></div>
+    <div class="sl">빠른 시작 — 내 스타일 선택</div>
+    <div class="presets" id="presetBtns"></div>
+    <div class="preset-comment" id="presetComment"></div>
+    <div class="sl">또는 직접 선택</div>
+    <div class="sw"><input type="text" id="srch" placeholder="서비스 검색 (예: 넷플, 게임, AI)"></div>
+    <div class="pb" id="pickBar">선택 0개 · 월 0원</div>
+    <div id="catalog"></div>
+    <div style="margin-top:6px;">
+      <div id="custRows"></div>
+      <button class="add-btn" id="addCust">+ 목록에 없는 서비스 추가</button>
+    </div>
+    <div id="gCarrier" class="gate">
+      <div class="sl">통신사를 알려주시면 결합 추천도 해드려요</div>
+      <div class="sg g5" id="carrierG">
+        <button class="sb" data-v="KT">KT</button>
+        <button class="sb" data-v="SKT">SKT</button>
+        <button class="sb" data-v="LGU">LG U+</button>
+        <button class="sb" data-v="MVNO">알뜰폰</button>
+        <button class="sb" data-v="?">모름</button>
+      </div>
+    </div>
+    <div id="gContract" class="gate">
+      <div class="sl">지금 요금제에 약정이 있나요?</div>
+      <div class="sg g3" id="contractG">
+        <button class="sb" data-v="yes">약정 중</button>
+        <button class="sb" data-v="no">약정 없음</button>
+        <button class="sb" data-v="?">잘 모름</button>
+      </div>
+      <div class="c-help" id="cHelp"></div>
+    </div>
+    <button class="cta" id="goS2" disabled>내 구독 유형 분석하기 →</button>
   </div>
 
-  <div id="gCarrier" class="gate">
-    <div class="slabel">02 — 통신사를 알려주시면 결합 추천도 해드려요</div>
-    <div class="sg g5" id="carrierG">
-      <button class="sb" data-v="KT">KT</button>
-      <button class="sb" data-v="SKT">SKT</button>
-      <button class="sb" data-v="LGU">LG U+</button>
-      <button class="sb" data-v="MVNO">알뜰폰</button>
-      <button class="sb" data-v="?">모름</button>
+  <!-- STEP 2 -->
+  <div id="s2" class="step">
+    <button class="back-btn" id="backS1">← 다시 선택하기</button>
+    <div class="sl m">내 구독 유형</div>
+    <div class="type-card" id="typeCard">
+      <span class="type-emoji" id="typeEmoji"></span>
+      <div class="type-name" id="typeName"></div>
+      <div class="type-desc" id="typeDesc"></div>
     </div>
-  </div>
-
-  <div id="gContract" class="gate">
-    <div class="slabel">03 — 지금 요금제에 약정이 있나요?</div>
-    <div class="sg g3" id="contractG">
-      <button class="sb" data-v="yes">약정 중</button>
-      <button class="sb" data-v="no">약정 없음</button>
-      <button class="sb" data-v="?">잘 모름</button>
+    <div class="sl m">카테고리별 내역</div>
+    <div class="cat-breakdown" id="catBreakdown"></div>
+    <div class="totals2">
+      <div class="tl big"><span>월 합계</span><span id="r2Month"></span></div>
+      <div class="tl yr"><span>연 환산 (×12)</span><span id="r2Year"></span></div>
     </div>
-    <div class="c-help" id="cHelp"></div>
-  </div>
-
-  <button class="cta" id="diagBtn" disabled>현황 정리하기</button>
-
-  <div class="rzone" id="rzone">
-    <div class="slabel m">04 — 지금 내 구독 현황</div>
-    <div id="stList"></div>
-    <div class="totals">
-      <div class="tl month"><span>월 합계</span><span id="rMonth">0원</span></div>
-      <div class="tl year"><span>연 환산 (×12)</span><span id="rYear">0원</span></div>
+    <div class="stamp-wrap"><div class="stamp" id="stampEl">한 해 지출<span class="big" id="stampAmt"></span></div></div>
+    <div class="sl m">💸 이렇게 하면 더 싸게</div>
+    <div class="plan-box plan-cheap" id="planCheap">
+      <div class="plan-hd"><span class="ptag">PLAN A</span><span class="ptitle">가장 싸게 쓰는 법</span></div>
+      <div class="plan-bd" id="cheapList"></div>
     </div>
-    <div class="stamp-wrap">
-      <div class="stamp" id="stampEl">한 해 지출<span class="big" id="stampAmt">0원</span></div>
+    <div class="sl m">👑 이렇게 하면 혜택 더</div>
+    <div class="plan-box plan-rich" id="planRich">
+      <div class="plan-hd"><span class="ptag">PLAN B</span><span class="ptitle">혜택 많이 받는 법</span></div>
+      <div class="plan-bd" id="richList"></div>
     </div>
-    <div class="slabel m">05 — 추천 견적 두 가지</div>
-    <div class="twin" id="plansArea"></div>
+    <button class="cta sec" id="goS3">공유 이미지 만들기 →</button>
     <button class="rep-btn" id="repBtn">가격 오류 또는 추가할 서비스가 있나요? 제보하기</button>
-    <div class="fp">가격은 2026년 상반기 기준 참고값이에요. 실제 금액은 등급·약정·프로모션·카드사 환율(USD 서비스)에 따라 달라질 수 있어요. 통신사 결합, 위약금 등은 가입 전 공식 채널에서 반드시 확인하세요. USD 서비스는 1달러 = 1,400원 기준으로 환산했어요. 이 도구는 참고용이며 금융·통신 자문이 아니에요.</div>
+    <div class="fp">가격은 2026년 상반기 기준 참고값이에요. 실제 금액은 등급·약정·프로모션·카드사 환율에 따라 달라질 수 있어요. 이 도구는 참고용이며 금융·통신 자문이 아니에요.</div>
   </div>
+
+  <!-- STEP 3 -->
+  <div id="s3" class="step">
+    <button class="back-btn" id="backS2">← 결과로 돌아가기</button>
+    <div class="sl m">누구에게 공유할까요?</div>
+    <div class="msg-tabs" id="msgTabs">
+      <button class="msg-tab on" data-grp="friend">친구한테</button>
+      <button class="msg-tab" data-grp="parents">부모님한테</button>
+      <button class="msg-tab" data-grp="self">나 자신에게</button>
+    </div>
+    <div class="msg-options" id="msgOptions"></div>
+    <div class="sl m">공유 이미지 미리보기</div>
+    <div class="share-preview-wrap">
+      <div id="shareCard">
+        <span class="sc-emoji" id="scEmoji"></span>
+        <div class="sc-type" id="scType"></div>
+        <div class="sc-desc" id="scDesc"></div>
+        <hr class="sc-divider">
+        <div class="sc-row"><span class="lbl">월 구독료</span><span class="val" id="scMonth"></span></div>
+        <div class="sc-row"><span class="lbl">연간 환산</span><span class="val red" id="scYear"></span></div>
+        <div class="sc-saving" id="scSaving"></div>
+        <div class="sc-msg" id="scMsg">멘트를 선택해주세요</div>
+        <div class="sc-footer">bari-shin.github.io/membership</div>
+      </div>
+    </div>
+    <button class="cta" id="downloadBtn">📥 이미지 저장하기</button>
+  </div>
+
   <div class="ty">★ SAVE SMART ★</div>
 </div>
 <div class="torn torn-bottom"></div>
 </div>
 
 <script>
-const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScGaCzTNAXp4Kn_iwqMm7WC3l6I1w6OGJXm-TkNAnN4K6RBSw/viewform";
-const RATE = 1400; // USD to KRW
+const FORM_URL="https://docs.google.com/forms/d/e/1FAIpQLScGaCzTNAXp4Kn_iwqMm7WC3l6I1w6OGJXm-TkNAnN4K6RBSw/viewform";
+const RATE=1400;
+document.getElementById('today').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\. /g,'.').replace(/\.$/,'');
+const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
+const gs=q=>'https://www.google.com/search?q='+encodeURIComponent(q+' 해지 방법');
 
-document.getElementById('today').textContent =
-  new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\. /g,'.').replace(/\.$/,'');
-
-const won = n => Math.round(n).toLocaleString('ko-KR')+'원';
-const gs = q => 'https://www.google.com/search?q='+encodeURIComponent(q+' 해지 방법');
-
-const CAT = [
-  {c:'영상 OTT', items:[
-    {id:'netflix',n:'넷플릭스',d:'글로벌 1위 영상 스트리밍',
-      tiers:[['광고형',5500],['스탠다드',13500],['프리미엄',17000]],def:1,
-      cancel:'https://help.netflix.com/ko/node/407'},
-    {id:'coupangplay',n:'쿠팡플레이',d:'쿠팡 와우에 포함 · 스포츠·오리지널',
-      fixed:0,note:'쿠팡 와우 멤버십(7,890원)에 포함돼요. 와우를 함께 선택하면 정확히 반영돼요.',
-      cancel:gs('쿠팡 와우 멤버십')},
-    {id:'tving',n:'티빙',d:'CJ ENM 오리지널 · KBO 야구 생중계',
-      tiers:[['광고형',5500],['스탠다드',13500],['프리미엄',17000]],def:1,
-      cancel:gs('티빙')},
-    {id:'disney',n:'디즈니+',d:'디즈니·마블·스타워즈·픽사',
-      tiers:[['스탠다드',9900],['프리미엄',13900]],def:0,
-      cancel:gs('디즈니플러스')},
-    {id:'wavve',n:'웨이브',d:'KBS·MBC·SBS 지상파 다시보기',
-      tiers:[['스탠다드',7900],['프리미엄',10900]],def:0,
-      cancel:gs('웨이브 wavve')},
-    {id:'watcha',n:'왓챠',d:'영화 큐레이션 · 다양성 콘텐츠',
-      fixed:7900,cancel:gs('왓챠')},
-    {id:'laftel',n:'라프텔',d:'국내 최대 애니메이션 전문 OTT',
-      tiers:[['라이트',4900],['스탠다드',9900]],def:1,
-      cancel:gs('라프텔')},
-    {id:'appletv',n:'Apple TV+',d:'애플 오리지널 시리즈·영화',
-      usd:true,tiers:[['Standard',6.99]],def:0,
-      cancel:gs('Apple TV 플러스')},
-    {id:'uplustv',n:'U+모바일tv',d:'LG유플러스 모바일 방송·영화',
-      fixed:5500,cancel:gs('U+모바일tv')},
+// ===== CATALOG =====
+const CAT=[
+  {c:'영상 OTT',items:[
+    {id:'netflix',n:'넷플릭스',d:'글로벌 1위 영상 스트리밍',tiers:[['광고형',5500],['스탠다드',13500],['프리미엄',17000]],def:1,
+     tierInfo:[{f:'광고 있음·HD·동시접속 2대',rec:'가끔 보는 분'},{f:'광고 없음·FHD·동시접속 2대',rec:'일반 시청자'},{f:'광고 없음·4K·동시접속 4대',rec:'가족과 함께 보는 분'}],
+     tip:'통신사 결합 시 스탠다드 이상을 요금제에 포함할 수 있어요.',whoFor:'영화·드라마를 즐겨보는 분',
+     cancel:'https://help.netflix.com/ko/node/407'},
+    {id:'coupangplay',n:'쿠팡플레이',d:'쿠팡 와우에 포함·스포츠·오리지널',fixed:0,note:'쿠팡 와우(7,890원)에 포함돼요.',whoFor:'쿠팡 와우 이용 중인 분',cancel:gs('쿠팡 와우 멤버십')},
+    {id:'tving',n:'티빙',d:'CJ ENM 오리지널·KBO 야구 생중계',tiers:[['광고형',5500],['스탠다드',13500],['프리미엄',17000]],def:1,
+     tierInfo:[{f:'광고 있음·HD',rec:'가성비 원하는 분'},{f:'광고 없음·FHD·다운로드',rec:'일반 시청자'},{f:'광고 없음·4K·동시접속 4대',rec:'가족 이용'}],
+     tip:'디즈니+와 2사 번들로 묶으면 월 18,000원으로 절약돼요.',whoFor:'KBO 야구 팬·드라마 좋아하는 분',cancel:gs('티빙')},
+    {id:'disney',n:'디즈니+',d:'디즈니·마블·스타워즈·픽사',tiers:[['스탠다드',9900],['프리미엄',13900]],def:0,
+     tierInfo:[{f:'HD·동시접속 2대·다운로드 25편',rec:'혼자 보는 분'},{f:'4K·동시접속 4대·다운로드 50편',rec:'가족·고화질 원하는 분'}],
+     tip:'티빙·웨이브와 번들 이용 시 3사 합산 21,500원으로 절약 가능해요.',whoFor:'마블·스타워즈 팬',cancel:gs('디즈니플러스')},
+    {id:'wavve',n:'웨이브',d:'KBS·MBC·SBS 지상파 다시보기',tiers:[['스탠다드',7900],['프리미엄',10900]],def:0,
+     tierInfo:[{f:'HD·동시접속 1대',rec:'혼자 보는 분'},{f:'FHD·동시접속 3대·오프라인',rec:'가족 이용'}],
+     tip:'SKT T우주패스로 묶으면 더 저렴하게 이용할 수 있어요.',whoFor:'지상파 방송 다시보기 원하는 분',cancel:gs('웨이브 wavve')},
+    {id:'watcha',n:'왓챠',d:'영화 큐레이션·다양성 콘텐츠',fixed:7900,whoFor:'독립영화·다양한 장르 좋아하는 분',cancel:gs('왓챠')},
+    {id:'laftel',n:'라프텔',d:'국내 최대 애니메이션 전문 OTT',tiers:[['라이트',4900],['스탠다드',9900]],def:1,whoFor:'애니메이션 팬',cancel:gs('라프텔')},
+    {id:'appletv',n:'Apple TV+',d:'애플 오리지널 시리즈·영화',usd:true,tiers:[['Standard',6.99]],def:0,whoFor:'테드 래소·슈링킹 등 오리지널 팬',cancel:gs('Apple TV 플러스')},
+    {id:'uplustv',n:'U+모바일tv',d:'LGU+ 모바일 방송·영화',fixed:5500,whoFor:'LGU+ 이용자',cancel:gs('U+모바일tv')},
   ]},
-  {c:'스포츠 OTT', items:[
-    {id:'spotv',n:'SPOTV NOW',d:'EPL·라리가 등 해외 스포츠 중계',
-      tiers:[['라이트',6900],['스탠다드',9900],['프리미엄',14900]],def:1,
-      cancel:gs('SPOTV NOW')},
-    {id:'coupangsports',n:'쿠팡플레이 스포츠패스',d:'쿠팡 와우에 포함 · KBO·NBA 중계',
-      fixed:0,note:'쿠팡 와우 멤버십에 포함돼 추가 비용이 없어요.',
-      cancel:gs('쿠팡 와우 멤버십')},
+  {c:'스포츠 OTT',items:[
+    {id:'spotv',n:'SPOTV NOW',d:'EPL·라리가 등 해외 스포츠 중계',tiers:[['라이트',6900],['스탠다드',9900],['프리미엄',14900]],def:1,whoFor:'해외 스포츠 팬',cancel:gs('SPOTV NOW')},
+    {id:'coupangsports',n:'쿠팡플레이 스포츠패스',d:'쿠팡 와우 포함·KBO·NBA',fixed:0,note:'쿠팡 와우에 포함돼 추가 비용 없어요.',whoFor:'쿠팡 와우 이용 중인 분',cancel:gs('쿠팡 와우')},
   ]},
-  {c:'영상/음악', items:[
-    {id:'ytpremium',n:'유튜브 프리미엄',d:'광고 제거 + 유튜브 뮤직 무료 포함',
-      tiers:[['라이트',8500],['프리미엄',14900]],def:0,
-      cancel:'https://support.google.com/youtube/answer/6308278'},
+  {c:'영상/음악',items:[
+    {id:'ytpremium',n:'유튜브 프리미엄',d:'광고 제거·유튜브 뮤직 무료 포함',tiers:[['라이트',8500],['프리미엄',14900]],def:0,
+     tierInfo:[{f:'영상 광고 제거·백그라운드 재생',rec:'광고가 싫은 분 (뮤직 미포함)'},{f:'광고 제거·백그라운드·유튜브 뮤직 포함',rec:'음악도 같이 쓰는 분'}],
+     tip:'라이트는 유튜브 뮤직이 포함되지 않아요. 음악도 쓸 분은 프리미엄으로.',whoFor:'유튜브를 하루 1시간 이상 보는 분',
+     cancel:'https://support.google.com/youtube/answer/6308278'},
   ]},
-  {c:'음악', items:[
-    {id:'ytmusic',n:'유튜브 뮤직',d:'유튜브 기반 음악 · 프리미엄에 무료 포함',
-      fixed:11990,note:'유튜브 프리미엄 구독 시 무료로 포함돼요. 중복 선택 시 0원으로 처리해요.',
-      cancel:'https://support.google.com/youtube/answer/6308278'},
-    {id:'melon',n:'멜론',d:'국내 최대 음원 · K팝 팬덤 특화',
-      tiers:[['스트리밍',7900],['무제한',11400]],def:1,cancel:gs('멜론')},
-    {id:'spotify',n:'스포티파이',d:'글로벌 1위 · AI 음악 추천 강점',
-      fixed:11990,note:'네이버플러스 멤버십과 묶는 번들 제휴가 있어요.',
-      cancel:gs('스포티파이 Spotify')},
-    {id:'genie',n:'지니뮤직',d:'KT 계열 국내 음원 서비스',
-      fixed:11400,cancel:gs('지니뮤직')},
-    {id:'flo',n:'FLO',d:'SKT 계열 국내 음원 · 음질 강점',
-      fixed:11000,cancel:gs('FLO 플로 음악')},
-    {id:'vibe',n:'네이버 VIBE',d:'네이버 음악 스트리밍 서비스',
-      fixed:8900,cancel:gs('네이버 바이브 VIBE')},
-    {id:'bugs',n:'벅스',d:'고음질 국내 음원 전문 스트리밍',
-      fixed:10900,cancel:gs('벅스 bugs 음악')},
-    {id:'applemusic',n:'Apple Music',d:'무손실 고음질 · 애플 기기 최적화',
-      usd:true,tiers:[['Individual',10.99],['Family',16.99]],def:0,
-      note:'가족 공유(최대 6명)를 쓰면 1인당 단가가 크게 낮아져요.',
-      cancel:gs('Apple Music 애플뮤직')},
+  {c:'음악',items:[
+    {id:'ytmusic',n:'유튜브 뮤직',d:'유튜브 기반 음악·프리미엄에 포함',fixed:11990,note:'유튜브 프리미엄(프리미엄 등급)에 포함돼요.',whoFor:'이미 유튜브 프리미엄 쓰는 분',cancel:'https://support.google.com/youtube/answer/6308278'},
+    {id:'melon',n:'멜론',d:'국내 최대 음원·K팝 팬덤 특화',tiers:[['스트리밍',7900],['무제한',11400]],def:1,
+     tierInfo:[{f:'스트리밍 전용·오프라인 미지원',rec:'집에서만 듣는 분'},{f:'오프라인 저장·무제한 재생',rec:'이동 중에도 자주 듣는 분'}],whoFor:'K팝 팬·차트 중심 청취자',cancel:gs('멜론')},
+    {id:'spotify',n:'스포티파이',d:'글로벌 1위·AI 음악 추천 강점',fixed:11990,note:'네이버플러스 멤버십과 번들 제휴가 있어요.',whoFor:'해외 음악·팟캐스트 즐기는 분',cancel:gs('스포티파이')},
+    {id:'genie',n:'지니뮤직',d:'KT 계열 국내 음원',fixed:11400,whoFor:'KT 이용자·국내 음원 원하는 분',cancel:gs('지니뮤직')},
+    {id:'flo',n:'FLO',d:'SKT 계열 음원·음질 강점',fixed:11000,whoFor:'SKT 이용자·음질 중시하는 분',cancel:gs('FLO 플로')},
+    {id:'vibe',n:'네이버 VIBE',d:'네이버 음악 스트리밍',fixed:8900,whoFor:'네이버 서비스 자주 쓰는 분',cancel:gs('네이버 바이브')},
+    {id:'bugs',n:'벅스',d:'고음질 국내 음원 전문',fixed:10900,whoFor:'고음질 음원 원하는 분',cancel:gs('벅스 음악')},
+    {id:'applemusic',n:'Apple Music',d:'무손실 고음질·애플 기기 최적화',usd:true,tiers:[['Individual',10.99],['Family',16.99]],def:0,
+     tierInfo:[{f:'개인 1명·무손실 음질·오프라인',rec:'혼자 쓰는 분'},{f:'최대 6명 공유·무손실',rec:'가족과 함께 쓰는 분'}],
+     tip:'가족 공유로 나누면 1인당 월 3,000원대예요.',whoFor:'아이폰·맥 쓰는 분',cancel:gs('Apple Music')},
   ]},
-  {c:'오디오북', items:[
-    {id:'millie',n:'밀리의 서재',d:'전자책 + 오디오북 통합 구독',
-      tiers:[['베이직',9900],['프리미엄',12900]],def:0,cancel:gs('밀리의 서재')},
-    {id:'welaaa',n:'윌라',d:'오디오북 전문 · 자기계발·업무 도서 강점',
-      fixed:9900,cancel:gs('윌라 willa')},
-    {id:'audible',n:'Audible',d:'아마존 오디오북 · 영어 원서 강점',
-      usd:true,fixed:14.95,cancel:gs('Audible 오디블')},
+  {c:'오디오북',items:[
+    {id:'millie',n:'밀리의 서재',d:'전자책+오디오북 통합 구독',tiers:[['베이직',9900],['프리미엄',12900]],def:0,whoFor:'독서를 좋아하는 분',cancel:gs('밀리의 서재')},
+    {id:'welaaa',n:'윌라',d:'오디오북 전문·자기계발 도서 강점',fixed:9900,whoFor:'이동 중 책 듣고 싶은 분',cancel:gs('윌라 willa')},
+    {id:'audible',n:'Audible',d:'아마존 오디오북·영어 원서 강점',usd:true,fixed:14.95,whoFor:'영어 원서 청취하는 분',cancel:gs('Audible')},
   ]},
-  {c:'전자책', items:[
-    {id:'ridi',n:'리디셀렉트',d:'웹툰·만화·소설·전자책 무제한',
-      tiers:[['베이직',9900],['프리미엄',13900]],def:0,cancel:gs('리디셀렉트')},
-    {id:'kyobosam',n:'교보 sam',d:'교보문고 전자책 구독 서비스',
-      fixed:9900,cancel:gs('교보문고 sam')},
-    {id:'yes24',n:'YES24 북클럽',d:'예스24 전자책 월정액',
-      fixed:5500,cancel:gs('YES24 북클럽')},
+  {c:'전자책',items:[
+    {id:'ridi',n:'리디셀렉트',d:'웹툰·만화·소설·전자책 무제한',tiers:[['베이직',9900],['프리미엄',13900]],def:0,whoFor:'웹툰·소설 즐기는 분',cancel:gs('리디셀렉트')},
+    {id:'kyobosam',n:'교보 sam',d:'교보문고 전자책 구독',fixed:9900,whoFor:'교보문고 자주 이용하는 분',cancel:gs('교보문고 sam')},
+    {id:'yes24',n:'YES24 북클럽',d:'예스24 전자책 월정액',fixed:5500,whoFor:'예스24 자주 이용하는 분',cancel:gs('YES24 북클럽')},
   ]},
-  {c:'쇼핑/멤버십', items:[
-    {id:'coupangwow',n:'쿠팡 와우',d:'무료배송·반품·쿠팡플레이·무료배달 통합',
-      fixed:7890,note:'쿠팡플레이·스포츠패스·쿠팡이츠 무료배달까지 포함돼요.',
-      cancel:gs('쿠팡 와우 멤버십')},
-    {id:'naverplus',n:'네이버플러스 멤버십',d:'네이버 쇼핑 적립 · 웹툰·뮤직 혜택',
-      fixed:4900,cancel:gs('네이버플러스 멤버십')},
-    {id:'ssg',n:'신세계 유니버스 클럽',d:'신세계·이마트·SSG·G마켓 통합 멤버십',
-      fixed:4900,cancel:gs('신세계 유니버스 클럽')},
-    {id:'tuniverse',n:'T우주패스',d:'SKT OTT 묶음 · 웨이브·플로 결합 가능',
-      tiers:[['mini',4900],['all',9900]],def:1,cancel:gs('T우주 우주패스')},
-    {id:'kurly',n:'컬리멤버스',d:'마켓컬리 장보기 할인·무료배송',
-      fixed:1900,cancel:gs('컬리멤버스')},
+  {c:'쇼핑/멤버십',items:[
+    {id:'coupangwow',n:'쿠팡 와우',d:'무료배송·반품·쿠팡플레이·무료배달',fixed:7890,
+     tip:'이 하나로 쿠팡플레이·스포츠패스·쿠팡이츠 무료배달까지 포함이에요.',whoFor:'쿠팡에서 한 달에 2번 이상 쇼핑하는 분',cancel:gs('쿠팡 와우')},
+    {id:'naverplus',n:'네이버플러스 멤버십',d:'쇼핑 적립·웹툰·클라우드 혜택',fixed:4900,
+     tip:'스포티파이 번들, 웹툰 이용권, 네이버 클라우드 30GB 포함이에요.',whoFor:'네이버 쇼핑 자주 하는 분',cancel:gs('네이버플러스 멤버십')},
+    {id:'ssg',n:'신세계 유니버스 클럽',d:'신세계·이마트·SSG·G마켓 통합',fixed:4900,whoFor:'이마트·SSG 자주 이용하는 분',cancel:gs('신세계 유니버스 클럽')},
+    {id:'tuniverse',n:'T우주패스',d:'SKT OTT 묶음·웨이브·플로 결합',tiers:[['mini',4900],['all',9900]],def:1,
+     tierInfo:[{f:'OTT 1종 포함',rec:'SKT 이용 중·OTT 하나만 더 필요한 분'},{f:'OTT 2종+음악 포함',rec:'여러 콘텐츠 묶어서 쓰는 분'}],whoFor:'SKT 이용자',cancel:gs('T우주패스')},
+    {id:'kurly',n:'컬리멤버스',d:'마켓컬리 장보기 할인·무료배송',fixed:1900,whoFor:'컬리에서 주 1회 이상 장보는 분',cancel:gs('컬리멤버스')},
   ]},
-  {c:'배달/이동', items:[
-    {id:'baemin',n:'배민클럽',d:'배달의민족 무료배달·할인 멤버십',
-      fixed:3990,cancel:gs('배민클럽')},
-    {id:'yogipass',n:'요기패스X',d:'요기요 무료배달 멤버십',
-      fixed:2900,cancel:gs('요기패스X 요기요')},
-    {id:'kakaot',n:'카카오T 멤버십',d:'택시·킥보드 등 이동 할인',
-      fixed:3900,cancel:gs('카카오T 멤버십')},
+  {c:'배달/이동',items:[
+    {id:'baemin',n:'배민클럽',d:'배달의민족 무료배달·할인',fixed:3990,whoFor:'배민 주 2회 이상 이용하는 분',cancel:gs('배민클럽')},
+    {id:'yogipass',n:'요기패스X',d:'요기요 무료배달 멤버십',fixed:2900,whoFor:'요기요 자주 이용하는 분',cancel:gs('요기패스X')},
+    {id:'kakaot',n:'카카오T 멤버십',d:'택시·킥보드 이동 할인',fixed:3900,whoFor:'택시·킥보드 자주 이용하는 분',cancel:gs('카카오T 멤버십')},
   ]},
-  {c:'통신', items:[
-    {id:'telecom',n:'통신사 멤버십',d:'KT·SKT·LGU+ 포인트·할인 멤버십',
-      manual:true,note:'대부분 요금제에 무료로 포함돼요. 유료라면 금액을 입력하세요.',
-      cancel:gs('통신사 멤버십')},
+  {c:'통신',items:[
+    {id:'telecom',n:'통신사 멤버십',d:'KT·SKT·LGU+ 포인트·할인 멤버십',manual:true,note:'대부분 무료 포함이에요. 유료라면 금액 입력하세요.',whoFor:'통신사 포인트 적립하는 분',cancel:gs('통신사 멤버십')},
   ]},
-  {c:'AI', items:[
-    {id:'chatgpt',n:'ChatGPT',d:'OpenAI · 가장 널리 쓰이는 AI 챗봇',
-      usd:true,tiers:[['Go',8],['Plus',20],['Pro $100',100],['Pro $200',200]],def:1,
-      cancel:gs('ChatGPT 구독 취소')},
-    {id:'gemini',n:'Gemini',d:'구글 AI · 구글 앱·검색 연동 최적화',
-      usd:true,tiers:[['AI Plus',7.99],['AI Pro',19.99],['AI Ultra $100',99.99],['AI Ultra $200',200]],def:1,
-      cancel:gs('Google Gemini 구독 취소')},
-    {id:'claude',n:'Claude',d:'Anthropic AI · 글쓰기·분석·코딩 강점',
-      usd:true,tiers:[['Pro',20],['Max 5x',100],['Max 20x',200]],def:0,
-      cancel:gs('Claude Pro 취소')},
-    {id:'perplexity',n:'Perplexity',d:'AI 검색 엔진 · 출처 기반 답변',
-      usd:true,tiers:[['Pro',20],['Max',200]],def:0,
-      cancel:gs('Perplexity 구독 취소')},
+  {c:'AI',items:[
+    {id:'chatgpt',n:'ChatGPT',d:'OpenAI·가장 널리 쓰이는 AI 챗봇',usd:true,tiers:[['Go',8],['Plus',20],['Pro $100',100],['Pro $200',200]],def:1,
+     tierInfo:[{f:'GPT-4o·이미지 생성',rec:'가끔 쓰는 분'},{f:'고급 모델·코드 실행·분석',rec:'업무에 자주 쓰는 분'},{f:'최상위 모델·최대 사용량',rec:'헤비 유저'},{f:'무제한에 가까운 최상위',rec:'전문가·파워 유저'}],
+     tip:'Go플랜도 핵심 기능은 다 써요. Plus가 가장 많이 선택하는 조합이에요.',whoFor:'글쓰기·요약·코딩에 AI 활용하는 분',cancel:gs('ChatGPT 구독 취소')},
+    {id:'gemini',n:'Gemini',d:'구글 AI·구글 앱 연동 최적화',usd:true,tiers:[['AI Plus',7.99],['AI Pro',19.99],['AI Ultra $100',99.99],['AI Ultra $200',200]],def:1,
+     tierInfo:[{f:'Gemini 2.0·기본 기능',rec:'구글 앱 연동 원하는 분'},{f:'2.5 Pro·1M 컨텍스트',rec:'긴 문서 분석하는 분'},{f:'최상위 모델·높은 사용량',rec:'헤비 유저'},{f:'무제한에 가까운 최상위',rec:'전문가'}],
+     tip:'구글 워크스페이스를 쓴다면 AI Pro가 가장 효율적이에요.',whoFor:'구글 독스·지메일 주로 쓰는 분',cancel:gs('Gemini 구독 취소')},
+    {id:'claude',n:'Claude',d:'Anthropic AI·글쓰기·분석·코딩 강점',usd:true,tiers:[['Pro',20],['Max 5x',100],['Max 20x',200]],def:0,
+     tierInfo:[{f:'Claude 고급 모델·일반 사용량',rec:'글쓰기·분석이 주 용도인 분'},{f:'5배 높은 사용량',rec:'하루에 많이 쓰는 분'},{f:'20배 최대 사용량',rec:'파워 유저'}],
+     tip:'글쓰기와 긴 문서 분석에 특히 강해요.',whoFor:'글쓰기·분석·코딩하는 분',cancel:gs('Claude 구독 취소')},
+    {id:'perplexity',n:'Perplexity',d:'AI 검색 엔진·출처 기반 답변',usd:true,tiers:[['Pro',20],['Max',200]],def:0,
+     tierInfo:[{f:'무제한 검색·심층 분석',rec:'자료 조사가 많은 분'},{f:'최대 사용량',rec:'리서치 헤비 유저'}],
+     tip:'정보 검색·리서치에 특화돼 있어요. ChatGPT와 역할을 나눠 쓰면 좋아요.',whoFor:'자료 조사·리서치 많이 하는 분',cancel:gs('Perplexity 구독 취소')},
   ]},
-  {c:'문서/클라우드', items:[
-    {id:'ms365',n:'Microsoft 365',d:'워드·엑셀·PPT + 1TB OneDrive',
-      fixed:11900,cancel:gs('Microsoft 365')},
-    {id:'googleone',n:'Google One',d:'구글 드라이브·지메일·포토 저장공간',
-      tiers:[['100GB',2400],['200GB',3800],['2TB',11900]],def:0,
-      cancel:gs('Google One 구글원')},
-    {id:'icloud',n:'iCloud+',d:'애플 기기 클라우드 저장·공유',
-      tiers:[['50GB',1100],['200GB',3300],['2TB',11100]],def:0,
-      cancel:gs('iCloud 아이클라우드')},
-    {id:'dropbox',n:'Dropbox',d:'파일 클라우드 저장·동기화·협업',
-      fixed:11900,cancel:gs('Dropbox 드롭박스')},
-    {id:'mybox',n:'네이버 MYBOX',d:'네이버 클라우드 저장공간',
-      tiers:[['30GB',990],['100GB',2900],['1TB',8900]],def:0,
-      cancel:gs('네이버 MYBOX 마이박스')},
+  {c:'문서/클라우드',items:[
+    {id:'ms365',n:'Microsoft 365',d:'워드·엑셀·PPT + 1TB OneDrive',fixed:11900,
+     tip:'연간 결제 시 약 17% 할인돼요. 가족 요금제는 6명까지 공유 가능해요.',whoFor:'오피스 프로그램 자주 쓰는 분',cancel:gs('Microsoft 365')},
+    {id:'googleone',n:'Google One',d:'구글 드라이브·지메일·포토 저장공간',tiers:[['100GB',2400],['200GB',3800],['2TB',11900]],def:0,whoFor:'구글 포토·드라이브 많이 쓰는 분',cancel:gs('Google One')},
+    {id:'icloud',n:'iCloud+',d:'애플 기기 클라우드 저장·공유',tiers:[['50GB',1100],['200GB',3300],['2TB',11100]],def:0,whoFor:'아이폰·맥 쓰는 분',cancel:gs('iCloud')},
+    {id:'dropbox',n:'Dropbox',d:'파일 클라우드 저장·동기화·협업',fixed:11900,whoFor:'팀 협업에 파일 공유 많이 하는 분',cancel:gs('Dropbox')},
+    {id:'mybox',n:'네이버 MYBOX',d:'네이버 클라우드 저장공간',tiers:[['30GB',990],['100GB',2900],['1TB',8900]],def:0,whoFor:'네이버 생태계 자주 쓰는 분',cancel:gs('네이버 MYBOX')},
   ]},
-  {c:'디자인/업무', items:[
-    {id:'canva',n:'Canva Pro',d:'온라인 디자인 툴 · SNS·문서 제작',
-      fixed:13000,cancel:gs('Canva Pro 캔바')},
-    {id:'adobe',n:'Adobe Creative Cloud',d:'포토샵·일러스트 등 전문 디자인 전체',
-      fixed:67000,cancel:gs('Adobe Creative Cloud')},
-    {id:'notion',n:'Notion Plus',d:'메모·문서·데이터베이스 협업 툴',
-      usd:true,fixed:12,cancel:gs('Notion 노션')},
-    {id:'grammarly',n:'Grammarly',d:'영어 문법·글쓰기 AI 교정 도구',
-      usd:true,fixed:12,cancel:gs('Grammarly 그래머리')},
+  {c:'디자인/업무',items:[
+    {id:'canva',n:'Canva Pro',d:'온라인 디자인 툴·SNS·문서 제작',fixed:13000,whoFor:'SNS 콘텐츠·발표자료 만드는 분',cancel:gs('Canva Pro')},
+    {id:'adobe',n:'Adobe Creative Cloud',d:'포토샵·일러스트 등 전문 디자인',fixed:67000,tip:'연간 약정 플랜이 월별보다 30% 이상 저렴해요.',whoFor:'디자이너·사진작가·영상 편집자',cancel:gs('Adobe Creative Cloud')},
+    {id:'notion',n:'Notion Plus',d:'메모·문서·데이터베이스 협업 툴',usd:true,fixed:12,
+     tip:'연간 결제 시 20% 할인이에요. 팀 플랜은 인당 $10로 더 저렴해요.',whoFor:'업무 정리·프로젝트 관리 원하는 분',cancel:gs('Notion')},
+    {id:'grammarly',n:'Grammarly',d:'영어 문법·글쓰기 AI 교정',usd:true,fixed:12,whoFor:'영어 문서 작성이 많은 분',cancel:gs('Grammarly')},
   ]},
-  {c:'웹툰/웹소설', items:[
-    {id:'kakaopage',n:'카카오페이지',d:'웹툰·웹소설·영화 (캐시 충전형)',
-      manual:true,note:'캐시 충전형이에요. 월 평균 결제 금액을 입력하세요.',
-      cancel:gs('카카오페이지')},
-    {id:'kakaowebtoon',n:'카카오웹툰',d:'카카오 웹툰 플랫폼 (쿠키 구매형)',
-      manual:true,note:'월 평균 결제 금액을 입력하세요.',
-      cancel:gs('카카오웹툰')},
-    {id:'naverwebtoon',n:'네이버웹툰',d:'국내 최대 웹툰 플랫폼 (쿠키 구매형)',
-      manual:true,note:'월 평균 쿠키 결제 금액을 입력하세요.',
-      cancel:gs('네이버웹툰 쿠키')},
+  {c:'웹툰/웹소설',items:[
+    {id:'kakaopage',n:'카카오페이지',d:'웹툰·웹소설·영화 (캐시 충전형)',manual:true,note:'월 평균 결제 금액을 입력하세요.',whoFor:'웹소설·웹툰 즐기는 분',cancel:gs('카카오페이지')},
+    {id:'kakaowebtoon',n:'카카오웹툰',d:'카카오 웹툰 플랫폼',manual:true,note:'월 평균 결제 금액을 입력하세요.',whoFor:'카카오 웹툰 즐기는 분',cancel:gs('카카오웹툰')},
+    {id:'naverwebtoon',n:'네이버웹툰',d:'국내 최대 웹툰 플랫폼',manual:true,note:'월 평균 쿠키 결제 금액을 입력하세요.',whoFor:'네이버 웹툰 즐기는 분',cancel:gs('네이버웹툰')},
   ]},
-  {c:'지식/강의', items:[
-    {id:'longblack',n:'롱블랙',d:'하루 한 편 비즈니스·라이프스타일 아티클',
-      fixed:4900,cancel:gs('롱블랙 longblack')},
-    {id:'publy',n:'퍼블리',d:'직장인 실무 지식 구독 서비스',
-      fixed:9900,cancel:gs('퍼블리 PUBLY')},
-    {id:'class101',n:'클래스101',d:'취미·실무·부업 온라인 클래스',
-      fixed:14900,cancel:gs('클래스101')},
-    {id:'inflearn',n:'인프런',d:'IT·개발 강의 플랫폼 (강의별 구매 중심)',
-      manual:true,note:'월 평균 결제 금액을 입력하세요.',cancel:gs('인프런')},
-    {id:'fastcampus',n:'패스트캠퍼스',d:'직무·실무 강의 플랫폼',
-      manual:true,note:'월 평균 결제 금액을 입력하세요.',cancel:gs('패스트캠퍼스')},
-    {id:'duolingo',n:'듀오링고 Super',d:'게임형 언어 학습 앱 · 광고 제거',
-      usd:true,fixed:6.99,cancel:gs('듀오링고 Super')},
+  {c:'지식/강의',items:[
+    {id:'longblack',n:'롱블랙',d:'하루 한 편 비즈니스·라이프스타일 아티클',fixed:4900,whoFor:'매일 짧은 지식 읽고 싶은 분',cancel:gs('롱블랙')},
+    {id:'publy',n:'퍼블리',d:'직장인 실무 지식 구독',fixed:9900,whoFor:'실무 스킬 향상에 투자하는 분',cancel:gs('퍼블리')},
+    {id:'class101',n:'클래스101',d:'취미·실무·부업 온라인 클래스',fixed:14900,whoFor:'취미나 부업 스킬 배우고 싶은 분',cancel:gs('클래스101')},
+    {id:'inflearn',n:'인프런',d:'IT·개발 강의 (강의별 구매 중심)',manual:true,whoFor:'개발·IT 공부하는 분',cancel:gs('인프런')},
+    {id:'fastcampus',n:'패스트캠퍼스',d:'직무·실무 강의',manual:true,whoFor:'직무 역량 강화하는 분',cancel:gs('패스트캠퍼스')},
+    {id:'duolingo',n:'듀오링고 Super',d:'게임형 언어 학습·광고 제거',usd:true,fixed:6.99,whoFor:'매일 조금씩 외국어 공부하는 분',cancel:gs('듀오링고')},
   ]},
-  {c:'게임', items:[
-    {id:'xbox',n:'Xbox Game Pass',d:'엑스박스·PC 게임 무제한 구독',
-      fixed:11900,cancel:gs('Xbox Game Pass')},
-    {id:'psplus',n:'PlayStation Plus',d:'플레이스테이션 온라인·무료 게임',
-      tiers:[['에센셜',5900],['엑스트라',8900],['프리미엄',11900]],def:0,
-      cancel:gs('PlayStation Plus')},
-    {id:'nso',n:'Nintendo Switch Online',d:'닌텐도 온라인 플레이·클래식 게임',
-      tiers:[['개인',2500],['가족',4500]],def:0,
-      cancel:gs('Nintendo Switch Online')},
-    {id:'eaplay',n:'EA Play',d:'EA 게임 구독 · FIFA·Apex 등',
-      fixed:4900,cancel:gs('EA Play')},
-    {id:'geforce',n:'GeForce NOW',d:'NVIDIA 클라우드 게임 스트리밍',
-      tiers:[['프리오리티',12900],['얼티밋',23900]],def:0,
-      cancel:gs('GeForce NOW')},
-    {id:'applearcade',n:'Apple Arcade',d:'애플 게임 구독 · 광고 없는 게임',
-      usd:true,fixed:6.99,cancel:gs('Apple Arcade')},
-    {id:'playpass',n:'Google Play Pass',d:'안드로이드 게임·앱 무제한',
-      usd:true,fixed:4.99,cancel:gs('Google Play Pass')},
+  {c:'게임',items:[
+    {id:'xbox',n:'Xbox Game Pass',d:'엑스박스·PC 게임 무제한',fixed:11900,whoFor:'엑스박스·PC 게이머',cancel:gs('Xbox Game Pass')},
+    {id:'psplus',n:'PlayStation Plus',d:'PS 온라인·무료 게임',tiers:[['에센셜',5900],['엑스트라',8900],['프리미엄',11900]],def:0,
+     tierInfo:[{f:'온라인 플레이·월정액 무료 게임',rec:'온라인만 하는 분'},{f:'에센셜+400개 게임 라이브러리',rec:'다양한 게임 즐기는 분'},{f:'엑스트라+클래식 게임·스트리밍',rec:'레트로 게임 좋아하는 분'}],whoFor:'플레이스테이션 이용자',cancel:gs('PlayStation Plus')},
+    {id:'nso',n:'Nintendo Switch Online',d:'닌텐도 온라인·클래식 게임',tiers:[['개인',2500],['가족',4500]],def:0,whoFor:'닌텐도 이용자',cancel:gs('Nintendo Switch Online')},
+    {id:'eaplay',n:'EA Play',d:'EA 게임 구독·FIFA·Apex 등',fixed:4900,whoFor:'EA 게임 즐기는 분',cancel:gs('EA Play')},
+    {id:'geforce',n:'GeForce NOW',d:'NVIDIA 클라우드 게임 스트리밍',tiers:[['프리오리티',12900],['얼티밋',23900]],def:0,whoFor:'고사양 게임을 저사양 PC로 하는 분',cancel:gs('GeForce NOW')},
+    {id:'applearcade',n:'Apple Arcade',d:'애플 게임 구독·광고 없는 게임',usd:true,fixed:6.99,whoFor:'아이폰·아이패드 게임 즐기는 분',cancel:gs('Apple Arcade')},
+    {id:'playpass',n:'Google Play Pass',d:'안드로이드 게임·앱 무제한',usd:true,fixed:4.99,whoFor:'안드로이드 게임 즐기는 분',cancel:gs('Google Play Pass')},
+    {id:'discord',n:'Discord Nitro',d:'디스코드 프리미엄·고화질·이모지',usd:true,tiers:[['Basic',2.99],['Nitro',9.99]],def:1,whoFor:'게이머·커뮤니티 활발하게 쓰는 분',cancel:gs('Discord Nitro')},
   ]},
-  {c:'기타', items:[
-    {id:'kakaoemoji',n:'카카오 이모티콘 플러스',d:'카카오톡 이모티콘 무제한',
-      fixed:4900,cancel:gs('카카오 이모티콘 플러스')},
-    {id:'news',n:'디지털 뉴스 구독',d:'언론사 유료 디지털 구독 (조선·중앙·한겨레 등)',
-      manual:true,cancel:gs('디지털 뉴스 구독')},
-    {id:'coffee',n:'커피 구독',d:'스타벅스 등 커피 브랜드 정기 이용권',
-      manual:true,cancel:gs('커피 구독 서비스')},
-    {id:'gym',n:'헬스장',d:'헬스장·피트니스 월정액 이용권',
-      manual:true,cancel:gs('헬스장 환불')},
-    {id:'pt',n:'PT',d:'퍼스널 트레이닝 정기 이용권',
-      manual:true,cancel:gs('PT 퍼스널트레이닝 환불')},
-    {id:'classpass',n:'클래스패스',d:'요가·필라테스 등 여러 운동시설 통합 멤버십',
-      usd:true,tiers:[['Starter',19],['Standard',49],['Premium',79]],def:1,
-      cancel:gs('클래스패스 ClassPass')},
-    {id:'nordvpn',n:'NordVPN',d:'보안·프라이버시 VPN 서비스',
-      usd:true,fixed:4.99,cancel:gs('NordVPN')},
-    {id:'expressvpn',n:'ExpressVPN',d:'고속 프리미엄 VPN 보안',
-      usd:true,fixed:9.99,cancel:gs('ExpressVPN')},
-    {id:'surfshark',n:'Surfshark',d:'무제한 기기 지원 VPN 서비스',
-      usd:true,fixed:2.49,cancel:gs('Surfshark')},
+  {c:'기타',items:[
+    {id:'kakaoemoji',n:'카카오 이모티콘 플러스',d:'카카오톡 이모티콘 무제한',fixed:4900,whoFor:'카카오톡 이모티콘 많이 쓰는 분',cancel:gs('카카오 이모티콘 플러스')},
+    {id:'news',n:'디지털 뉴스 구독',d:'언론사 유료 디지털 구독',manual:true,whoFor:'깊이 있는 뉴스 읽고 싶은 분',cancel:gs('디지털 뉴스 구독')},
+    {id:'coffee',n:'커피 구독',d:'스타벅스 등 커피 정기 이용권',manual:true,whoFor:'커피를 매일 마시는 분',cancel:gs('커피 구독')},
+    {id:'gym',n:'헬스장',d:'헬스장·피트니스 월정액',manual:true,whoFor:'규칙적으로 운동하는 분',cancel:gs('헬스장 환불')},
+    {id:'pt',n:'PT',d:'퍼스널 트레이닝 정기 이용',manual:true,whoFor:'전문 트레이너와 운동하는 분',cancel:gs('PT 환불')},
+    {id:'classpass',n:'클래스패스',d:'요가·필라테스 여러 운동시설 통합',usd:true,tiers:[['Starter',19],['Standard',49],['Premium',79]],def:1,whoFor:'다양한 운동 시설 이용하는 분',cancel:gs('ClassPass')},
+    {id:'nordvpn',n:'NordVPN',d:'보안·프라이버시 VPN',usd:true,fixed:4.99,whoFor:'보안·해외 콘텐츠 원하는 분',cancel:gs('NordVPN')},
+    {id:'expressvpn',n:'ExpressVPN',d:'고속 프리미엄 VPN',usd:true,fixed:9.99,whoFor:'빠른 VPN 원하는 분',cancel:gs('ExpressVPN')},
+    {id:'surfshark',n:'Surfshark',d:'무제한 기기 VPN 서비스',usd:true,fixed:2.49,whoFor:'여러 기기에 VPN 쓰는 분',cancel:gs('Surfshark')},
   ]},
 ];
 
+// ===== TYPES =====
+const TYPES=[
+  {k:'🚨 구독 과부하형',e:'🚨',n:'구독 과부하형',d:'이쯤 되면 구독이 취미가 아니라 고정비인 사람',c:'var(--stamp)'},
+  {k:'📺 OTT 수집가',e:'📺',n:'OTT 수집가',d:'볼 건 많은데 고르는 데 30분 쓰는 사람',c:'var(--pen)'},
+  {k:'🤖 AI 파워유저',e:'🤖',n:'AI 파워유저',d:'GPT 없으면 출근 못 하는 사람',c:'var(--pen)'},
+  {k:'🎬 콘텐츠 중독자',e:'🎬',n:'콘텐츠 중독자',d:'넷플 보다 잠들고 티빙으로 일어나는 사람',c:'var(--pen)'},
+  {k:'🎮 게이머',e:'🎮',n:'게이머',d:'주말이 사라진 사람',c:'var(--pen)'},
+  {k:'⚽ 스포츠 직관러',e:'⚽',n:'스포츠 직관러',d:'경기 일정이 곧 내 일정인 사람',c:'var(--pen)'},
+  {k:'🎧 오디오 라이프러',e:'🎧',n:'오디오 라이프러',d:'눈보다 귀가 더 바쁜 사람',c:'var(--green)'},
+  {k:'🎵 음악 감성러',e:'🎵',n:'음악 감성러',d:'이어폰 없으면 못 사는 사람',c:'var(--green)'},
+  {k:'🎯 크리에이터',e:'🎯',n:'크리에이터',d:'만드는 게 곧 사는 이유인 사람',c:'var(--green)'},
+  {k:'🎨 디자인러',e:'🎨',n:'디자인러',d:'썸네일 하나에도 진심인 사람',c:'var(--green)'},
+  {k:'📚 자기계발러',e:'📚',n:'자기계발러',d:'성장에 아낌없이 투자하는 사람',c:'var(--green)'},
+  {k:'🗣️ 외국어 도전자',e:'🗣️',n:'외국어 도전자',d:'오늘도 듀오링고 알림에 쫓기는 사람',c:'var(--green)'},
+  {k:'☁️ 디지털 노마드',e:'☁️',n:'디지털 노마드',d:'노트북 하나로 어디서든 일하는 사람',c:'var(--pen)'},
+  {k:'💼 생산성 인간',e:'💼',n:'생산성 인간',d:'일 잘하려고 구독했는데 일이 더 늘어난 사람',c:'var(--pen)'},
+  {k:'🛒 쇼핑 멤버십 마스터',e:'🛒',n:'쇼핑 멤버십 마스터',d:'장바구니가 곧 취미인 사람',c:'var(--marker)'},
+  {k:'🍔 배달 의존형',e:'🍔',n:'배달 의존형',d:'냉장고보다 배달앱을 더 자주 여는 사람',c:'var(--marker)'},
+  {k:'🔐 보안 철저형',e:'🔐',n:'보안 철저형',d:'안전도 구독하는 시대에 사는 사람',c:'var(--pen)'},
+  {k:'🌍 글로벌 구독러',e:'🌍',n:'글로벌 구독러',d:'결제 문자는 달러가 더 익숙한 사람',c:'var(--pen)'},
+  {k:'🤑 구독 VIP',e:'🤑',n:'구독 VIP',d:'자동결제일이 월급날보다 무서운 사람',c:'var(--stamp)'},
+  {k:'👑 구독 풀세트',e:'👑',n:'구독 풀세트',d:'구독 안 하는 서비스가 뭔지 모르는 사람',c:'var(--stamp)'},
+  {k:'💸 절약형 구독러',e:'💸',n:'절약형 구독러',d:'구독도 가성비로 접근하는 현명한 사람',c:'var(--green)'},
+  {k:'🏋️ 헬스 루틴러',e:'🏋️',n:'헬스 루틴러',d:'운동도 데이터로 관리해야 마음이 편한 사람',c:'var(--green)'},
+  {k:'⚖️ 균형형 구독러',e:'⚖️',n:'균형형 구독러',d:'콘텐츠도 보고 공부도 하고 적당히 쓰는 사람',c:'var(--pen)'},
+  {k:'🧊 미니멀 구독러',e:'🧊',n:'미니멀 구독러',d:'진짜 필요한 것만 남긴 사람',c:'var(--green)'},
+];
+
+const CAT_MAP={
+  ott:['netflix','coupangplay','tving','disney','wavve','watcha','laftel','appletv','uplustv'],
+  sports:['spotv','coupangsports'],
+  music:['ytmusic','melon','spotify','genie','flo','vibe','bugs','applemusic'],
+  audiobook:['millie','welaaa','audible'],
+  ebook:['ridi','kyobosam','yes24'],
+  shopping:['coupangwow','naverplus','ssg','tuniverse','kurly'],
+  delivery:['baemin','yogipass','kakaot'],
+  ai:['chatgpt','gemini','claude','perplexity'],
+  cloud:['ms365','googleone','icloud','dropbox','mybox'],
+  design:['canva','adobe'],
+  work:['notion','grammarly'],
+  learn:['longblack','publy','class101','inflearn','fastcampus','duolingo'],
+  game:['xbox','psplus','nso','eaplay','geforce','applearcade','playpass','discord'],
+  vpn:['nordvpn','expressvpn','surfshark'],
+  usd:['appletv','audible','applemusic','chatgpt','gemini','claude','perplexity','notion','grammarly','duolingo','applearcade','playpass','classpass','nordvpn','expressvpn','surfshark','discord'],
+  fitness:['gym','pt','classpass'],
+};
+
+function detectType(onIds, totalMonth, totalCount){
+  const cnt=arr=>arr.filter(i=>onIds.includes(i)).length;
+  const ottC=cnt(CAT_MAP.ott), aiC=cnt(CAT_MAP.ai), gameC=cnt(CAT_MAP.game);
+  const musicC=cnt(CAT_MAP.music), sportsC=cnt(CAT_MAP.sports);
+  const shopC=cnt(CAT_MAP.shopping), delivC=cnt(CAT_MAP.delivery);
+  const cloudC=cnt(CAT_MAP.cloud), workC=cnt(CAT_MAP.work);
+  const designC=cnt(CAT_MAP.design), learnC=cnt(CAT_MAP.learn);
+  const audiobookC=cnt(CAT_MAP.audiobook), vpnC=cnt(CAT_MAP.vpn);
+  const usdC=cnt(CAT_MAP.usd), fitC=cnt(CAT_MAP.fitness);
+
+  if(totalCount>=15||totalMonth>=300000) return '🚨 구독 과부하형';
+  if(ottC>=5) return '📺 OTT 수집가';
+  if(aiC>=2) return '🤖 AI 파워유저';
+  if(ottC>=3) return '🎬 콘텐츠 중독자';
+  if(gameC>=2) return '🎮 게이머';
+  if(sportsC>=2) return '⚽ 스포츠 직관러';
+  if(musicC>=1&&audiobookC>=1) return '🎧 오디오 라이프러';
+  if(musicC>=2) return '🎵 음악 감성러';
+  if((onIds.includes('adobe')||onIds.includes('canva'))&&onIds.includes('ytpremium')) return '🎯 크리에이터';
+  if(designC>=2) return '🎨 디자인러';
+  if(learnC>=2||audiobookC>=2) return '📚 자기계발러';
+  if(onIds.includes('duolingo')) return '🗣️ 외국어 도전자';
+  if(cloudC>=2&&workC>=1) return '☁️ 디지털 노마드';
+  if(workC>=2) return '💼 생산성 인간';
+  if(shopC>=3) return '🛒 쇼핑 멤버십 마스터';
+  if(delivC>=2) return '🍔 배달 의존형';
+  if(vpnC>=2) return '🔐 보안 철저형';
+  if(usdC>=3) return '🌍 글로벌 구독러';
+  if(totalMonth>=200000) return '🤑 구독 VIP';
+  if(totalCount>=10) return '👑 구독 풀세트';
+  if(fitC>=2) return '🏋️ 헬스 루틴러';
+  if(totalMonth<=50000&&totalCount>=1) return '💸 절약형 구독러';
+  if(totalCount<=3&&totalCount>=1) return '🧊 미니멀 구독러';
+  return '⚖️ 균형형 구독러';
+}
+
+// ===== PRESETS =====
+const PRESETS=[
+  {n:'직장인 기본',e:'💼',comment:'직장인이 가장 많이 구독하는 조합이에요',
+   svcs:['netflix','ytpremium','coupangwow','chatgpt','ms365'],tiers:{netflix:1,ytpremium:0,chatgpt:1}},
+  {n:'크리에이터',e:'🎯',comment:'유튜버·디자이너가 자주 쓰는 조합이에요',
+   svcs:['ytpremium','adobe','notion','canva','chatgpt'],tiers:{ytpremium:1,chatgpt:1}},
+  {n:'절약형',e:'💸',comment:'필요한 것만 딱! 가성비 최고 조합이에요',
+   svcs:['coupangwow','naverplus','ytpremium'],tiers:{ytpremium:0}},
+  {n:'게임러',e:'🎮',comment:'주말이 사라진 게이머의 필수 조합이에요',
+   svcs:['xbox','ytpremium','discord','psplus'],tiers:{ytpremium:0,psplus:0}},
+  {n:'음악 마니아',e:'🎵',comment:'이어폰이 없으면 못 사는 분들의 조합이에요',
+   svcs:['spotify','ytpremium','millie'],tiers:{ytpremium:1}},
+];
+
+// ===== ANNUAL DISCOUNTS =====
+const ANN={spotify:0.17,ytpremium:0.17,duolingo:0.33,notion:0.20,canva:0.23,grammarly:0.50,adobe:0.30,nordvpn:0.58,expressvpn:0.50,surfshark:0.80,ms365:0.17};
+
+// ===== MESSAGES =====
+const MSGS={
+  friend:['친구야 돈 좀 아껴서 밥 좀 사줘라','야 너는 얼마 나오냐? 나 충격받음','구독 끊고 같이 밥이나 먹자'],
+  parents:['엄마, 아빠 돈 빠져나가. 빨리 해봐','부모님, 이거 모르면 손해예요','자녀를 위해 구독 정리해주세요 🙏'],
+  self:['이걸 이제야 알았다니...','커피 끊기 전에 구독 먼저 끊자','반성합니다. 바로 정리합니다'],
+};
+
 // ===== STATE =====
-const ST = {};
+const ST={};
 CAT.forEach(c=>c.items.forEach(it=>{
-  const p = it.manual ? 0 : (it.fixed!=null ? it.fixed : (it.tiers ? it.tiers[it.def||0][1] : 0));
-  ST[it.id] = {on:false, price:p, tidx:it.def||0};
+  const p=it.manual?0:(it.fixed!=null?it.fixed:(it.tiers?it.tiers[it.def||0][1]:0));
+  ST[it.id]={on:false,price:p,tidx:it.def||0};
 }));
-let carrier=null, contract=null;
+let carrier=null,contract=null,selectedMsg='',selectedMsgGrp='friend';
 
 // ===== HELPERS =====
-const byId = id => CAT.flatMap(c=>c.items).find(i=>i.id===id);
+const byId=id=>CAT.flatMap(c=>c.items).find(i=>i.id===id);
 function effKRW(id){
-  const s=ST[id], it=byId(id);
-  if(!s.on) return 0;
-  if(id==='ytmusic' && ST.ytpremium.on) return 0;
-  if((id==='coupangplay'||id==='coupangsports') && ST.coupangwow.on) return 0;
-  return it.usd ? Math.round(s.price*RATE) : s.price;
+  const s=ST[id],it=byId(id);
+  if(!s.on)return 0;
+  if(id==='ytmusic'&&ST.ytpremium&&ST.ytpremium.on)return 0;
+  if((id==='coupangplay'||id==='coupangsports')&&ST.coupangwow&&ST.coupangwow.on)return 0;
+  return it.usd?Math.round(s.price*RATE):s.price;
 }
-function customTotal(){
-  let s=0;
-  document.querySelectorAll('.cust-row').forEach(r=>{
-    s += Number(r.querySelector('[data-pr]').value)||0;
-  });
-  return s;
-}
-function monthTotal(){
-  let s=0;
-  Object.keys(ST).forEach(id=>s+=effKRW(id));
-  return s+customTotal();
-}
-function selCount(){
-  return Object.values(ST).filter(v=>v.on).length +
-    [...document.querySelectorAll('.cust-row')].filter(r=>Number(r.querySelector('[data-pr]').value)>0).length;
-}
+function custTotal(){let s=0;document.querySelectorAll('.cr').forEach(r=>{s+=Number(r.querySelector('[data-pr]').value)||0;});return s;}
+function monthTotal(){let s=0;Object.keys(ST).forEach(id=>s+=effKRW(id));return s+custTotal();}
+function selIds(){return Object.keys(ST).filter(id=>ST[id].on);}
+function selCount(){return selIds().length+[...document.querySelectorAll('.cr')].filter(r=>Number(r.querySelector('[data-pr]').value)>0).length;}
 
-// ===== PRICE TAG =====
 function pTag(id){
-  const it=byId(id), s=ST[id];
+  const it=byId(id),s=ST[id];
   if(!s.on){
-    if(it.manual) return '<span style="color:var(--soft)">직접입력</span>';
-    if(it.usd) return `<span style="color:var(--soft)">$${s.price}</span>`;
-    return `<span style="color:var(--soft)">${won(s.price)}</span>`;
+    if(it.manual)return`<span style="color:var(--soft)">직접입력</span>`;
+    if(it.usd)return`<span style="color:var(--soft)">$${s.price}</span>`;
+    return`<span style="color:var(--soft)">${won(s.price)}</span>`;
   }
-  if(id==='ytmusic'&&ST.ytpremium.on) return '<span style="color:var(--green)">포함</span>';
-  if((id==='coupangplay'||id==='coupangsports')&&ST.coupangwow.on) return '<span style="color:var(--green)">와우포함</span>';
-  if(it.usd){
-    const kr=effKRW(id);
-    return `$${s.price}<small>≈${won(kr)}</small>`;
-  }
+  if(id==='ytmusic'&&ST.ytpremium.on)return`<span style="color:var(--green)">포함</span>`;
+  if((id==='coupangplay'||id==='coupangsports')&&ST.coupangwow.on)return`<span style="color:var(--green)">와우포함</span>`;
+  if(it.usd){const kr=effKRW(id);return`$${s.price}<small>≈${won(kr)}</small>`;}
   return won(s.price);
 }
-
-function refreshTag(id){
-  const card=document.querySelector(`[data-id="${id}"]`);
-  if(card) card.querySelector('[data-ptag]').innerHTML=pTag(id);
-}
+function refreshTag(id){const c=document.querySelector(`[data-id="${id}"]`);if(c)c.querySelector('[data-ptag]').innerHTML=pTag(id);}
 
 // ===== BUILD CATALOG =====
 function buildCatalog(){
   const el=document.getElementById('catalog');
   CAT.forEach((c,ci)=>{
-    const div=document.createElement('div');
-    div.className='cat';
-    div.dataset.ci=ci;
+    const div=document.createElement('div');div.className='cat';div.dataset.ci=ci;
     div.innerHTML=`<div class="cat-h"><span class="cn">${c.c}</span><span class="cm"><span data-csc></span>${c.items.length}개 <span class="chev">▶</span></span></div><div class="cat-b"></div>`;
     const body=div.querySelector('.cat-b');
     c.items.forEach(it=>{
       const s=ST[it.id];
       const card=document.createElement('div');
-      card.className='svc';
-      card.dataset.id=it.id;
+      card.className='svc';card.dataset.id=it.id;
       card.dataset.srch=(it.n+' '+(it.d||'')+' '+c.c).toLowerCase();
-
-      // tiers html
+      const hasInfo=it.tierInfo||it.tip||it.whoFor;
+      const tabsHtml=hasInfo?`<div class="sv-tabs"><button class="sv-tab on" data-tab="tier">등급 선택</button><button class="sv-tab" data-tab="info">구독 혜택</button></div>`:'';
       let tierH='';
-      if(it.tiers&&it.tiers.length>1){
-        tierH=`<div class="tiers">${it.tiers.map((t,i)=>`<span class="tier${i===(it.def||0)?' on':''}" data-ti="${i}">${t[0]}</span>`).join('')}</div>`;
-      }
-
-      // price edit
+      if(it.tiers&&it.tiers.length>1)tierH=`<div class="tiers">${it.tiers.map((t,i)=>`<span class="tier${i===(it.def||0)?' on':''}" data-ti="${i}">${t[0]}</span>`).join('')}</div>`;
       const unit=it.usd?'USD':'원';
-      const elabel=it.usd?'실제 결제금액 (USD)':'월 금액';
-      const pval=it.manual?'0':String(s.price);
-      const peH=`<div class="pe"><label>${elabel}</label><input type="number" data-pin min="0" value="${pval}"><span class="unit">${unit}</span></div>`;
+      const pin=`<div class="pe"><label>${it.usd?'결제금액 (USD)':'월 금액'}</label><input type="number" data-pin min="0" value="${it.manual?'0':s.price}"><span class="unit">${unit}</span></div>`;
       const noteH=it.note?`<div class="sv-note">${it.note}</div>`:'';
-
-      card.innerHTML=`<div class="sv-top">
-        <div class="sv-chk"></div>
-        <div class="sv-info"><div class="sv-name">${it.n}</div><div class="sv-desc">${it.d}</div></div>
-        <div class="sv-price" data-ptag>${pTag(it.id)}</div>
-      </div>
-      <div class="sv-detail">${tierH}${peH}${noteH}</div>`;
-
-      // click toggle
-      card.querySelector('.sv-top').addEventListener('click',()=>toggle(it.id));
-
-      // tier click
-      card.querySelectorAll('.tier').forEach(t=>{
-        t.addEventListener('click',e=>{
-          e.stopPropagation();
-          const idx=Number(t.dataset.ti);
-          card.querySelectorAll('.tier').forEach(tt=>tt.classList.remove('on'));
-          t.classList.add('on');
-          ST[it.id].tidx=idx;
-          ST[it.id].price=it.tiers[idx][1];
-          // sync pin
-          const pin=card.querySelector('[data-pin]');
-          if(pin) pin.value=it.tiers[idx][1];
-          refreshTag(it.id);
-          updateTotals();
-        });
-      });
-
-      // price input
-      const pin=card.querySelector('[data-pin]');
-      pin.addEventListener('click',e=>e.stopPropagation());
-      pin.addEventListener('input',()=>{
-        ST[it.id].price=Number(pin.value)||0;
-        refreshTag(it.id);
-        updateTotals();
-      });
-
+      let infoH='';
+      if(hasInfo){
+        infoH=`<div class="benefit-panel" style="display:none" data-info-panel>`;
+        if(it.tierInfo){infoH+=`<div class="bt">등급별 혜택</div>`;
+          it.tierInfo.forEach((ti,i)=>{const tn=it.tiers?it.tiers[i][0]:(i===0?'기본':'');infoH+=`<div class="tier-row-info"><span class="tri-name">${tn}</span><div><div class="tri-feat">${ti.f}</div><div class="tri-rec">→ ${ti.rec}</div></div></div>`;});
+        }
+        if(it.whoFor)infoH+=`<div class="who-for">👤 <b>이런 분께 추천:</b> ${it.whoFor}</div>`;
+        if(it.tip)infoH+=`<div class="tip-line">💡 ${it.tip}</div>`;
+        infoH+='</div>';
+      }
+      card.innerHTML=`<div class="sv-top"><div class="sv-chk"></div><div class="sv-info"><div class="sv-name">${it.n}</div><div class="sv-desc">${it.d}</div></div><div class="sv-price" data-ptag>${pTag(it.id)}</div></div>
+      <div class="sv-detail">${tabsHtml}<div data-tier-panel>${tierH}${pin}${noteH}</div>${infoH}</div>`;
+      card.querySelector('.sv-top').addEventListener('click',()=>toggleSvc(it.id));
+      card.querySelectorAll('.tier').forEach(t=>t.addEventListener('click',e=>{
+        e.stopPropagation();const idx=Number(t.dataset.ti);
+        card.querySelectorAll('.tier').forEach(tt=>tt.classList.remove('on'));t.classList.add('on');
+        ST[it.id].tidx=idx;ST[it.id].price=it.tiers[idx][1];
+        const pi=card.querySelector('[data-pin]');if(pi)pi.value=it.tiers[idx][1];
+        refreshTag(it.id);updateTotals();
+      }));
+      const pi=card.querySelector('[data-pin]');
+      if(pi){pi.addEventListener('click',e=>e.stopPropagation());pi.addEventListener('input',()=>{ST[it.id].price=Number(pi.value)||0;refreshTag(it.id);updateTotals();});}
+      card.querySelectorAll('.sv-tab').forEach(tab=>tab.addEventListener('click',e=>{
+        e.stopPropagation();const t=tab.dataset.tab;
+        card.querySelectorAll('.sv-tab').forEach(tt=>tt.classList.remove('on'));tab.classList.add('on');
+        card.querySelector('[data-tier-panel]').style.display=t==='tier'?'':'none';
+        const ip=card.querySelector('[data-info-panel]');if(ip)ip.style.display=t==='info'?'':'none';
+      }));
       body.appendChild(card);
     });
-
     div.querySelector('.cat-h').addEventListener('click',()=>div.classList.toggle('op'));
     el.appendChild(div);
   });
 }
 
 // ===== TOGGLE =====
-function toggle(id){
-  const s=ST[id];
-  s.on=!s.on;
+function toggleSvc(id){
+  const s=ST[id];s.on=!s.on;
   const card=document.querySelector(`[data-id="${id}"]`);
-  card.classList.toggle('on',s.on);
-  card.querySelector('.sv-chk').textContent=s.on?'✓':'';
+  card.classList.toggle('on',s.on);card.querySelector('.sv-chk').textContent=s.on?'✓':'';
   refreshTag(id);
-  // cascade
-  if(id==='ytpremium') refreshTag('ytmusic');
+  if(id==='ytpremium')refreshTag('ytmusic');
   if(id==='coupangwow'){refreshTag('coupangplay');refreshTag('coupangsports');}
-  updateCatCount(id);
-  updateTotals();
-  checkGates();
+  updateCatCount(id);updateTotals();checkGates();
 }
 
 function updateCatCount(id){
   for(let i=0;i<CAT.length;i++){
     if(CAT[i].items.some(it=>it.id===id)){
-      const div=document.querySelector(`[data-ci="${i}"]`);
-      if(!div) return;
+      const d=document.querySelector(`[data-ci="${i}"]`);if(!d)return;
       const n=CAT[i].items.filter(it=>ST[it.id]&&ST[it.id].on).length;
-      div.querySelector('[data-csc]').textContent=n?n+'개 선택 · ':'';
+      d.querySelector('[data-csc]').textContent=n?n+'개 선택 · ':'';
     }
   }
 }
 
-// ===== TOTALS =====
 function updateTotals(){
-  const m=monthTotal(), sc=selCount();
+  const m=monthTotal(),sc=selCount();
   document.getElementById('pickBar').textContent=`선택 ${sc}개 · 월 ${won(m)}`;
+}
+
+// ===== PRESETS BUILD =====
+function buildPresets(){
+  const wrap=document.getElementById('presetBtns');
+  PRESETS.forEach((p,pi)=>{
+    const btn=document.createElement('button');btn.className='preset';
+    btn.textContent=p.e+' '+p.n;
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.preset').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      document.getElementById('presetComment').textContent=p.comment;
+      Object.keys(ST).forEach(id=>{
+        if(ST[id].on){ST[id].on=false;const c=document.querySelector(`[data-id="${id}"]`);if(c){c.classList.remove('on');c.querySelector('.sv-chk').textContent='';}}
+      });
+      p.svcs.forEach(id=>{
+        if(!ST[id])return;
+        ST[id].on=true;
+        if(p.tiers&&p.tiers[id]!=null){ST[id].tidx=p.tiers[id];ST[id].price=byId(id).tiers[p.tiers[id]][1];}
+        const c=document.querySelector(`[data-id="${id}"]`);
+        if(c){c.classList.add('on');c.querySelector('.sv-chk').textContent='✓';
+          if(p.tiers&&p.tiers[id]!=null){c.querySelectorAll('.tier').forEach((t,i)=>t.classList.toggle('on',i===p.tiers[id]));}
+          refreshTag(id);}
+      });
+      updateTotals();checkGates();
+    });
+    wrap.appendChild(btn);
+  });
 }
 
 // ===== GATES =====
 function checkGates(){
   const any=selCount()>0;
   document.getElementById('gCarrier').classList.toggle('op',any);
-  if(!any){carrier=null;contract=null;resetSelBtns('carrierG');resetSelBtns('contractG');}
+  if(!any){carrier=null;contract=null;rsbtn('carrierG');rsbtn('contractG');}
   document.getElementById('gContract').classList.toggle('op',any&&carrier!=null);
-  document.getElementById('diagBtn').disabled=!(any&&carrier&&contract);
+  document.getElementById('goS2').disabled=!(any&&carrier&&contract);
 }
-function resetSelBtns(gid){
-  document.querySelectorAll(`#${gid} .sb`).forEach(b=>b.classList.remove('on'));
-}
+function rsbtn(gid){document.querySelectorAll(`#${gid} .sb`).forEach(b=>b.classList.remove('on'));}
 
-// ===== CARRIER / CONTRACT =====
-document.querySelectorAll('#carrierG .sb').forEach(b=>{
-  b.addEventListener('click',()=>{
-    resetSelBtns('carrierG');b.classList.add('on');
-    carrier=b.dataset.v;checkGates();
-  });
-});
-const CHELP={
-  yes:'약정 중이면 통신사·요금제 변경 시 위약금이 생길 수 있어요. 현재 요금제 그대로 OTT만 얹는 방향 위주로 추천해드려요.',
-  no:'약정이 없으니 요금제 변경이나 번호이동까지 열어서 가장 유리한 조합을 찾을 수 있어요.',
-  '?':'약정 잔여 기간은 통신사 앱 → 요금제/약정 메뉴에서 확인할 수 있어요. 일단 보수적 기준으로 추천해드려요.'
-};
-document.querySelectorAll('#contractG .sb').forEach(b=>{
-  b.addEventListener('click',()=>{
-    resetSelBtns('contractG');b.classList.add('on');
-    contract=b.dataset.v;
-    document.getElementById('cHelp').textContent=CHELP[contract]||'';
-    checkGates();
-  });
-});
+document.querySelectorAll('#carrierG .sb').forEach(b=>b.addEventListener('click',()=>{rsbtn('carrierG');b.classList.add('on');carrier=b.dataset.v;checkGates();}));
+const CHELP={yes:'약정 중이면 통신사 변경 시 위약금이 생길 수 있어요. 현재 요금제 그대로에서 OTT를 얹는 방향으로 추천드려요.',no:'약정이 없으니 요금제 변경이나 번호이동까지 열어서 최적 조합을 찾을 수 있어요.','?':'약정 잔여는 통신사 앱에서 확인할 수 있어요. 보수적 기준으로 추천드려요.'};
+document.querySelectorAll('#contractG .sb').forEach(b=>b.addEventListener('click',()=>{rsbtn('contractG');b.classList.add('on');contract=b.dataset.v;document.getElementById('cHelp').textContent=CHELP[contract]||'';checkGates();}));
 
-// ===== CUSTOM ROWS =====
+// ===== CUSTOM =====
 document.getElementById('addCust').addEventListener('click',()=>{
-  const row=document.createElement('div');
-  row.className='cust-row';
-  row.innerHTML=`<input type="text" placeholder="서비스 이름" style="border:none;border-bottom:1px solid var(--line);background:transparent;font-size:14px;flex:1;padding:3px 2px;font-family:'IBM Plex Sans KR'"><input type="number" data-pr placeholder="0" min="0" style="width:90px;border:none;border-bottom:1px solid var(--line);background:transparent;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:14px;padding:3px 2px"><button title="삭제">✕</button>`;
+  const row=document.createElement('div');row.className='cust-row cr';
+  row.innerHTML=`<input type="text" placeholder="서비스 이름" style="flex:1;border:none;border-bottom:1px solid var(--line);background:transparent;font-size:13px;padding:3px 2px;font-family:'IBM Plex Sans KR'"><input type="number" data-pr placeholder="0" min="0" style="width:85px;border:none;border-bottom:1px solid var(--line);background:transparent;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;padding:3px 2px"><button>✕</button>`;
   row.querySelector('button').addEventListener('click',()=>{row.remove();updateTotals();checkGates();});
   row.querySelector('[data-pr]').addEventListener('input',()=>{updateTotals();checkGates();});
   document.getElementById('custRows').appendChild(row);
 });
 
 // ===== SEARCH =====
+let lastQ='';
 document.getElementById('srch').addEventListener('input',e=>{
-  const q=e.target.value.trim().toLowerCase();
-  document.querySelectorAll('.svc').forEach(c=>{
-    c.style.display=(!q||c.dataset.srch.includes(q))?'':'none';
-  });
+  lastQ=e.target.value;const q=lastQ.trim().toLowerCase();
+  document.querySelectorAll('.svc').forEach(c=>{c.style.display=(!q||c.dataset.srch.includes(q))?'':'none';});
   document.querySelectorAll('.cat').forEach(cat=>{
     const vis=[...cat.querySelectorAll('.svc')].some(c=>c.style.display!=='none');
-    cat.style.display=vis?'':'none';
-    if(q&&vis) cat.classList.add('op');
+    cat.style.display=vis?'':'none';if(q&&vis)cat.classList.add('op');
   });
 });
 
-// ===== DIAGNOSE =====
-const CARRIER_TIPS={
-  KT:{
-    cheap:['KT 구독에서 유튜브 프리미엄 라이트를 월 8,000원에 제공해요. 단독 가입(8,500원)보다 저렴해요.','넷플릭스 초이스 요금제를 쓰면 OTT가 요금제에 포함돼 추가 비용이 없어요.','선택약정(25%)과 가족결합 할인을 함께 적용하면 통신비를 크게 줄일 수 있어요.'],
-    rich:['KT 유튜브 프리미엄 초이스 스페셜 요금제는 데이터 무제한 + 유튜브 프리미엄 라이트 + VVIP 멤버십을 묶어줘요.','넷플릭스·디즈니+ 등을 요금제에 결합하면 멤버십 등급 혜택까지 챙길 수 있어요.']
-  },
-  SKT:{
-    cheap:['다이렉트5G(월 6.2만~6.9만원) 요금제는 웨이브·플로·T우주패스 중 2개를 할인가로 묶을 수 있어요.','T우주패스 요금제를 쓰면 OTT 구독료가 포함돼 낱개 구독보다 저렴해요.'],
-    rich:['T우주패스 all로 웨이브·플로·시리즈온 등을 묶으면 데이터 혜택 + OTT를 함께 챙길 수 있어요.','넷플릭스 결합은 대부분 광고형 멤버십이에요. 프리미엄 멤버십은 최상위 요금제(5GX 플래티넘)에서만 제공돼요.']
-  },
-  LGU:{
-    cheap:['구독 플랫폼 유독(U+)에서 OTT를 여러 개 묶으면 개별 구독 대비 20~30% 저렴해요.','디즈니+·티빙·웨이브를 유독으로 묶으면 3사 번들보다 더 유리할 수 있어요.'],
-    rich:['5G 시그니처 이상 요금제는 넷플릭스와 유튜브 프리미엄을 함께 제공해요. 선택약정+가족결합 더하면 월 5만원대로 가능해요.','LG유플러스 스마트홈 결합 시 OTT + 인터넷 + 통신비 통합 할인이 커요.']
-  },
-  MVNO:{
-    cheap:['알뜰폰은 통신비 자체가 낮은 게 강점이에요. OTT는 낱개 또는 OTT사 직접 번들로 따로 관리하는 게 현실적이에요.','카드사 자동이체 할인(월 1,000~3,000원)이나 연간 구독 할인을 챙기는 게 가장 쉬운 절약법이에요.'],
-    rich:['알뜰폰은 통신사 OTT 결합 대상이 거의 아니에요. 통신비를 최저로 유지하면서, 콘텐츠는 번들·카드 할인으로 채우는 조합이 잘 맞아요.']
-  },
-  '?':{
-    cheap:['통신사를 알려주시면 더 정확한 결합 할인 금액을 보여드릴 수 있어요. 일단 OTT사 자체 번들 기준으로만 안내할게요.'],
-    rich:['통신사별 결합 혜택이 꽤 달라서, 통신사를 선택하면 데이터·멤버십까지 챙기는 조합을 더 정확히 볼 수 있어요.']
-  }
-};
+// ===== SAVINGS COMMENTS =====
+function savingsComment(monthly){
+  const annual=monthly*12;const lines=[];
+  if(monthly<=0)return lines;
+  if(monthly>=30000)lines.push(`매달 치킨 1마리 값이에요 🍗`);
+  else if(monthly>=15000)lines.push(`매달 스타벅스 아메리카노 ${Math.floor(monthly/5500)}잔이에요 ☕`);
+  else if(monthly>=5000)lines.push(`매달 편의점 커피 ${Math.floor(monthly/2500)}잔이에요`);
+  if(annual>=500000)lines.push(`1년이면 ${won(annual)} → 유럽 여행 항공권이에요 ✈️`);
+  else if(annual>=300000)lines.push(`1년이면 ${won(annual)} → 아이폰 할부금 3개월이에요 📱`);
+  else if(annual>=200000)lines.push(`1년이면 ${won(annual)} → 삼성전자 주식 1주예요 📈`);
+  else if(annual>=120000)lines.push(`1년이면 ${won(annual)} → 제주도 왕복 항공권이에요 🛫`);
+  else if(annual>=60000)lines.push(`1년이면 ${won(annual)} → 치킨 ${Math.floor(annual/22000)}마리예요 🍗`);
+  else lines.push(`1년이면 ${won(annual)} → 아메리카노 ${Math.floor(annual/5500)}잔이에요 ☕`);
+  return lines;
+}
 
-document.getElementById('diagBtn').addEventListener('click',()=>{
-  const on=id=>ST[id]&&ST[id].on;
-
-  // status list
-  const stList=document.getElementById('stList');
-  stList.innerHTML='';
-  Object.keys(ST).forEach(id=>{
-    if(!ST[id].on) return;
-    const it=byId(id);
-    const krw=effKRW(id);
-    const pr=id==='ytmusic'&&ST.ytpremium.on?'포함':
-             (id==='coupangplay'||id==='coupangsports')&&ST.coupangwow.on?'와우포함':
-             it.usd?`$${ST[id].price} (≈${won(krw)})`:
-             it.manual&&krw===0?'직접입력':won(krw);
-    const row=document.createElement('div');
-    row.className='st-row';
-    row.innerHTML=`<span class="st-nm">${it.n}</span><span class="st-pr">${pr}</span>${it.cancel?`<a class="st-cancel" href="${it.cancel}" target="_blank" rel="noopener">해지/관리</a>`:''}`;
-    stList.appendChild(row);
+// ===== STEP 2 =====
+function showStep2(){
+  const ids=selIds();const m=monthTotal();const y=m*12;const sc=selCount();
+  // type
+  const typeKey=detectType(ids,m,sc);
+  const typeObj=TYPES.find(t=>t.k===typeKey)||TYPES[TYPES.length-1];
+  document.getElementById('typeCard').style.background=typeObj.c||'var(--pen)';
+  document.getElementById('typeEmoji').textContent=typeObj.e;
+  document.getElementById('typeName').textContent=typeObj.n;
+  document.getElementById('typeDesc').textContent=typeObj.d;
+  // breakdown
+  const catDefs=[
+    {lbl:'영상 OTT',ids:CAT_MAP.ott,cls:''},
+    {lbl:'AI',ids:CAT_MAP.ai,cls:'ai'},
+    {lbl:'음악',ids:CAT_MAP.music,cls:''},
+    {lbl:'쇼핑/멤버십',ids:CAT_MAP.shopping,cls:''},
+    {lbl:'게임',ids:CAT_MAP.game,cls:''},
+    {lbl:'문서/클라우드',ids:CAT_MAP.cloud.concat(CAT_MAP.work),cls:''},
+    {lbl:'지식/강의',ids:CAT_MAP.learn.concat(CAT_MAP.audiobook),cls:''},
+    {lbl:'배달/이동',ids:CAT_MAP.delivery,cls:''},
+    {lbl:'기타',ids:CAT_MAP.vpn.concat(['kakaoemoji','news','coffee','gym','pt','classpass','telecom']),cls:''},
+  ];
+  // add customs
+  let custAmt=custTotal();
+  const bd=document.getElementById('catBreakdown');bd.innerHTML='';
+  catDefs.forEach(cd=>{
+    const amt=cd.ids.reduce((s,id)=>s+(ST[id]?effKRW(id):0),0);
+    if(amt<=0)return;
+    const pct=m>0?Math.round(amt/m*100):0;
+    const row=document.createElement('div');row.className='cb-row';
+    row.innerHTML=`<span class="cb-name">${cd.lbl}</span><div class="cb-bar"><div class="cb-fill ${cd.cls}" style="width:${pct}%"></div></div><span class="cb-amt">${won(amt)}</span><span class="cb-pct">${pct}%</span>`;
+    bd.appendChild(row);
   });
-  // custom rows
-  document.querySelectorAll('.cust-row').forEach(r=>{
-    const nm=r.querySelector('input[type=text]').value.trim()||'직접 추가';
-    const pr=Number(r.querySelector('[data-pr]').value)||0;
-    if(pr>0){
-      const row=document.createElement('div');
-      row.className='st-row';
-      row.innerHTML=`<span class="st-nm">${nm}</span><span class="st-pr">${won(pr)}</span><span></span>`;
-      stList.appendChild(row);
+  if(custAmt>0){
+    const pct=m>0?Math.round(custAmt/m*100):0;
+    const row=document.createElement('div');row.className='cb-row';
+    row.innerHTML=`<span class="cb-name">직접 추가</span><div class="cb-bar"><div class="cb-fill" style="width:${pct}%"></div></div><span class="cb-amt">${won(custAmt)}</span><span class="cb-pct">${pct}%</span>`;
+    bd.appendChild(row);
+  }
+  const aiAmt=CAT_MAP.ai.reduce((s,id)=>s+(ST[id]?effKRW(id):0),0);
+  if(aiAmt>0&&m>0){const aiRow=document.createElement('div');aiRow.style.cssText='font-size:12px;color:var(--stamp);margin-top:6px;';aiRow.textContent=`⚠️ AI 구독이 전체의 ${Math.round(aiAmt/m*100)}%예요`;bd.appendChild(aiRow);}
+  // totals
+  document.getElementById('r2Month').textContent=won(m);
+  document.getElementById('r2Year').textContent=won(y);
+  document.getElementById('stampAmt').textContent=won(y);
+  const stamp=document.getElementById('stampEl');stamp.classList.remove('show');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>stamp.classList.add('show')));
+  // plans
+  buildPlans(ids,m,y);
+  // update share card data
+  document.getElementById('scEmoji').textContent=typeObj.e;
+  document.getElementById('scType').textContent=typeObj.n;
+  document.getElementById('scDesc').textContent=typeObj.d;
+  document.getElementById('scMonth').textContent=won(m);
+  document.getElementById('scYear').textContent=won(y);
+  // saving highlight for share
+  const annSav=calcAnnualSavings(ids);
+  const cheapLines=buildCheapLines(ids,m,y);
+  const saveAmt=annSav.total;
+  let scSaveTxt=`연 ${won(y)} 지출 중`;
+  if(saveAmt>0)scSaveTxt+=`\n연간 절약 가능: ${won(saveAmt)}`;
+  const sc2=savingsComment(saveAmt/12);
+  if(sc2.length>0)scSaveTxt+='\n'+sc2[0];
+  document.getElementById('scSaving').textContent=scSaveTxt;
+}
+
+function calcAnnualSavings(ids){
+  let total=0;const details=[];
+  Object.keys(ANN).forEach(id=>{
+    if(ids.includes(id)){
+      const monthly=effKRW(id);const saving=Math.round(monthly*ANN[id]*12);
+      if(saving>0){total+=saving;details.push({n:byId(id).n,saving,rate:Math.round(ANN[id]*100)});}
     }
   });
-
-  const m=monthTotal(), y=m*12;
-  document.getElementById('rMonth').textContent=won(m);
-  document.getElementById('rYear').textContent=won(y);
-  document.getElementById('stampAmt').textContent=won(y);
-
-  buildPlans();
-
-  const rzone=document.getElementById('rzone');
-  rzone.classList.add('show');
-  const stamp=document.getElementById('stampEl');
-  stamp.classList.remove('show');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>stamp.classList.add('show')));
-  rzone.scrollIntoView({behavior:'smooth',block:'start'});
-});
-
-function buildPlans(){
-  const on=id=>ST[id]&&ST[id].on;
-  const locked=(contract==='yes'||contract==='?');
-  const cheap=[], rich=[];
-  const tips=CARRIER_TIPS[carrier]||CARRIER_TIPS['?'];
-
-  // OTT 번들
-  if(on('disney')&&on('tving')&&on('wavve')){
-    cheap.push('디즈니+·티빙·웨이브를 따로 내는 대신 3사 번들(월 21,500원)로 묶으면 개별 구독 대비 최대 37% 아껴요.');
-  } else if(on('disney')&&on('tving')){
-    cheap.push('디즈니+와 티빙은 2사 번들(월 18,000원)로 묶으면 약 23% 저렴해져요.');
-  }
-
-  // YouTube Music 중복
-  if(on('ytpremium')&&on('ytmusic')){
-    cheap.push('유튜브 뮤직은 유튜브 프리미엄에 이미 포함돼요. 따로 결제할 필요 없이 0원으로 계산했어요.');
-  }
-
-  // 음악 여러 개
-  const musicIds=['ytmusic','melon','spotify','genie','flo','vibe','bugs','applemusic'];
-  const musicOn=musicIds.filter(on).length;
-  if(musicOn>=2){
-    cheap.push(`음악 서비스를 ${musicOn}개 쓰고 있어요. 대부분 한 곳으로 충분하니 가장 자주 쓰는 1개만 남기면 매달 1만원 안팎이 절약돼요.`);
-  }
-  if(on('applemusic')) cheap.push('애플뮤직은 가족 공유(월 16.99달러, 최대 6명)를 쓰면 1인당 단가가 크게 낮아져요.');
-  if(on('spotify')&&on('naverplus')) cheap.push('스포티파이와 네이버플러스를 따로 내고 있다면, 네이버플러스+스포티파이 번들로 합치면 할인이 돼요.');
-
-  // OTT 여러 개
-  const ottIds=['netflix','tving','disney','wavve','watcha','laftel','appletv','coupangplay'];
-  const ottOn=ottIds.filter(on).length;
-  if(ottOn>=3){
-    cheap.push(`영상 OTT를 ${ottOn}개 보고 있어요. 한 달씩 번갈아 구독(로테이션)하면 콘텐츠는 거의 다 보면서 비용을 절반 가까이 줄여요.`);
-  }
-
-  // AI 여러 개
-  const aiIds=['chatgpt','gemini','claude','perplexity'];
-  const aiOn=aiIds.filter(on).length;
-  if(aiOn>=2){
-    cheap.push(`AI 구독을 ${aiOn}개 쓰고 있어요. 용도가 겹친다면 주력 1개만 남기는 게 큰 절약이에요. 각 서비스의 무료 티어로 보조 용도를 대체할 수 있어요.`);
-  }
-
-  // 클라우드 여러 개
-  const cloudIds=['googleone','icloud','dropbox','mybox'];
-  const cloudOn=cloudIds.filter(on).length;
-  if(cloudOn>=2){
-    cheap.push('클라우드 저장공간이 여러 개네요. 가장 자주 쓰는 하나로 통합하면 중복 비용이 줄어요.');
-  }
-
-  // 쿠팡 플레이 와우 없이
-  if(on('coupangplay')&&!on('coupangwow')){
-    cheap.push('쿠팡플레이는 와우 멤버십(7,890원)에 포함돼요. 쿠팡 쇼핑도 자주 한다면 와우 하나로 쇼핑+OTT+배달을 묶는 게 더 효율적이에요.');
-  }
-
-  // 약정 상태
-  if(!locked){
-    cheap.push('약정이 없으니, 데이터 사용이 적다면 더 낮은 요금제로 바꿔 통신비 자체를 줄이는 것도 방법이에요.');
-  }
-
-  // carrier tips
-  tips.cheap.forEach(t=>cheap.push(t));
-
-  const m=monthTotal(), y=m*12;
-  cheap.push(`연 ${won(y)} 규모예요. 안 쓰는 것 한 개만 줄여도 1년이면 꽤 큰 금액이 남아요.`);
-
-  // PLAN B
-  tips.rich.forEach(t=>rich.push(t));
-  if(on('coupangwow')){
-    rich.push('쿠팡 와우 하나로 쇼핑·배송·쿠팡플레이·배달 혜택이 다 묶여요. 이미 잘 쓰고 있는 거예요.');
-  }
-  if(locked){
-    rich.push('지금 약정 중이라면 요금제는 그대로 두고, 부가서비스로 OTT만 얹는 선에서 혜택을 늘리는 게 위약금 없이 가능한 방법이에요.');
-  } else {
-    rich.push('약정이 없으니, 가족 결합 할인을 확인해보세요. 1인당 월 1~2만원 추가 절감이 가능한 경우가 많아요.');
-  }
-  rich.push('이용 중인 카드의 OTT·구독 자동이체 할인을 확인해보세요. 카드 하나로 매달 추가 할인을 챙길 수 있어요.');
-
-  if(cheap.length===0) cheap.push('지금 조합은 비교적 군더더기가 없어요. 각 항목 옆 해지/관리 링크로 필요 없는 건 정리해보세요.');
-
-  document.getElementById('plansArea').innerHTML=`
-    <div class="plan plan-cheap"><div class="plan-h"><div class="ptag">PLAN A</div><div class="ptitle">가장 싸게 쓰는 법</div></div>
-      <div class="plan-b"><ul>${cheap.map(l=>`<li>${l}</li>`).join('')}</ul></div></div>
-    <div class="plan plan-rich"><div class="plan-h"><div class="ptag">PLAN B</div><div class="ptitle">혜택 많이 받는 법</div></div>
-      <div class="plan-b"><ul>${rich.map(l=>`<li>${l}</li>`).join('')}</ul></div></div>`;
+  return{total,details};
 }
+
+function buildCheapLines(ids,m,y){
+  const on=id=>ids.includes(id);const lines=[];
+  if(on('disney')&&on('tving')&&on('wavve')){
+    const ind=(ST.disney.price||0)+(ST.tving.price||0)+(ST.wavve.price||0);const save=ind-21500;
+    lines.push(`디즈니+·티빙·웨이브 → 3사 번들(21,500원)로 묶으면 월 ${won(Math.max(0,save))} 절약`+(save>0?` <span class="saving-highlight">월 ${won(save)} 절약</span>`:''));
+  } else if(on('disney')&&on('tving')){
+    const ind=(ST.disney.price||0)+(ST.tving.price||0);const save=ind-18000;
+    lines.push(`디즈니+·티빙 → 2사 번들(18,000원)으로 묶으면`+(save>0?` <span class="saving-highlight">월 ${won(save)} 절약</span>`:'약 23% 아껴요'));
+  }
+  if(on('ytpremium')&&on('ytmusic'))lines.push('유튜브 뮤직은 유튜브 프리미엄에 포함돼요. 따로 결제 안 해도 돼요 ✅');
+  const musicC=CAT_MAP.music.filter(id=>ids.includes(id)).length;
+  if(musicC>=2)lines.push(`음악 서비스 ${musicC}개 중 1개만 남기면 매달 ${won((musicC-1)*10000)} 안팎 절약이에요`);
+  const ottC=CAT_MAP.ott.filter(id=>ids.includes(id)).length;
+  if(ottC>=3)lines.push(`OTT ${ottC}개 → 한 달씩 번갈아 구독(로테이션)하면 비용 절반, 콘텐츠는 거의 동일해요`);
+  const aiC=CAT_MAP.ai.filter(id=>ids.includes(id)).length;
+  if(aiC>=2)lines.push(`AI ${aiC}개 중 주력 1개로 줄이면 매달 ${won((aiC-1)*28000)} 안팎 절약이에요`);
+  const annSav=calcAnnualSavings(ids);
+  if(annSav.total>0){
+    lines.push(`월간→연간 결제로 바꾸면 연 <span class="saving-highlight">${won(annSav.total)} 절약</span> 가능해요`);
+    const sc=savingsComment(annSav.total/12);
+    sc.forEach(s=>lines.push(s));
+  }
+  const locked=(contract==='yes'||contract==='?');
+  if(!locked)lines.push('약정이 없으니, 낮은 요금제로 갈아타 통신비 자체를 줄이는 것도 방법이에요');
+  if(lines.length===0)lines.push('지금 조합은 꽤 효율적이에요. 각 항목 등급이 맞는지 한 번 점검해보세요');
+  lines.push(`연 ${won(y)} 규모예요. 안 쓰는 것 1개만 줄여도 1년이면 큰 금액이 남아요`);
+  return lines;
+}
+
+function buildPlans(ids,m,y){
+  const cheapLines=buildCheapLines(ids,m,y);
+  const cl=document.getElementById('cheapList');
+  cl.innerHTML=`<ul>${cheapLines.map(l=>`<li>${l}</li>`).join('')}</ul>`;
+  const CARRIER_RICH={
+    KT:['KT 유튜브 프리미엄 라이트 결합 시 월 8,000원으로 이용 가능해요','넷플릭스 초이스 요금제로 OTT를 요금제에 포함하면 추가 할인이 붙어요','선택약정 25% + 가족결합 할인까지 더하면 통신비가 크게 줄어요'],
+    SKT:['T우주패스 all로 웨이브·플로를 묶으면 데이터+OTT 혜택을 한 번에 챙길 수 있어요','SKT 다이렉트5G 요금제는 월 6.2만원대로 OTT 2종 포함이에요'],
+    LGU:['LG유플러스 유독(U+)에서 OTT를 여러 개 묶으면 개별 대비 20~30% 저렴해요','5G 시그니처 이상 요금제는 넷플릭스+유튜브 프리미엄을 함께 제공해요'],
+    MVNO:['알뜰폰은 통신비 자체가 낮은 게 강점이에요. OTT는 OTT사 직접 번들로 별도 관리하세요','카드사 구독 자동이체 할인(월 1,000~3,000원)을 챙기는 게 현실적인 절약법이에요'],
+    '?':['통신사를 알려주시면 더 정확한 결합 혜택을 보여드릴 수 있어요'],
+  };
+  const richLines=(CARRIER_RICH[carrier]||CARRIER_RICH['?']).slice();
+  if(ids.includes('coupangwow'))richLines.push('쿠팡 와우 하나로 쇼핑·배송·쿠팡플레이·배달 혜택이 모두 묶여요');
+  if(ids.includes('applemusic'))richLines.push('애플뮤직 가족공유(6명, 월 16.99달러)로 나누면 1인당 월 약 4,000원대예요');
+  if(contract==='no')richLines.push('약정이 없으니 가족결합 할인을 확인해보세요. 1인당 월 1~2만원 절감이 가능해요');
+  richLines.push('이용 중인 카드의 OTT·구독 자동이체 할인을 확인해보세요');
+  const rl=document.getElementById('richList');
+  rl.innerHTML=`<ul>${richLines.map(l=>`<li>${l}</li>`).join('')}</ul>`;
+}
+
+// ===== STEP 3 =====
+function buildMsgOptions(grp){
+  const wrap=document.getElementById('msgOptions');wrap.innerHTML='';
+  (MSGS[grp]||[]).forEach(msg=>{
+    const btn=document.createElement('button');btn.className='msg-opt';btn.textContent=msg;
+    btn.addEventListener('click',()=>{
+      wrap.querySelectorAll('.msg-opt').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');selectedMsg=msg;
+      document.getElementById('scMsg').textContent=msg;
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+document.querySelectorAll('.msg-tab').forEach(tab=>tab.addEventListener('click',()=>{
+  document.querySelectorAll('.msg-tab').forEach(t=>t.classList.remove('on'));
+  tab.classList.add('on');selectedMsgGrp=tab.dataset.grp;
+  buildMsgOptions(selectedMsgGrp);
+}));
+
+// ===== NAV =====
+function showStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('show'));
+  document.getElementById('s'+n).classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('goS2').addEventListener('click',()=>{showStep2();showStep(2);});
+document.getElementById('backS1').addEventListener('click',()=>showStep(1));
+document.getElementById('goS3').addEventListener('click',()=>{buildMsgOptions('friend');showStep(3);});
+document.getElementById('backS2').addEventListener('click',()=>showStep(2));
+
+// ===== DOWNLOAD =====
+document.getElementById('downloadBtn').addEventListener('click',async()=>{
+  const card=document.getElementById('shareCard');
+  const btn=document.getElementById('downloadBtn');
+  btn.textContent='이미지 생성 중...';btn.disabled=true;
+  try{
+    const canvas=await html2canvas(card,{scale:2,backgroundColor:'#F3EEE2',useCORS:true});
+    const a=document.createElement('a');a.download='내구독영수증.png';a.href=canvas.toDataURL('image/png');a.click();
+  }catch(e){alert('이미지 생성에 실패했어요. 화면을 직접 캡처해보세요.');}
+  btn.textContent='📥 이미지 저장하기';btn.disabled=false;
+});
 
 // ===== REPORT =====
 document.getElementById('repBtn').addEventListener('click',()=>{
-  if(FORM_URL) window.open(FORM_URL,'_blank','noopener');
-  else alert('제보 폼 주소를 FORM_URL에 넣어주세요.');
+  if(FORM_URL)window.open(FORM_URL,'_blank','noopener');
 });
 
 // ===== INIT =====
 buildCatalog();
+buildPresets();
 updateTotals();
 </script>
 </body>
