@@ -206,7 +206,30 @@ h1{font-size:24px;line-height:1.3;margin:0 0 8px;font-weight:700;}
 .rep-btn{width:100%;margin-top:14px;padding:11px;background:none;border:1.5px dashed var(--soft);border-radius:4px;color:var(--soft);font-size:13px;cursor:pointer;font-family:'IBM Plex Sans KR';}
 .fp{margin-top:20px;padding-top:14px;border-top:1px dashed var(--line);font-size:11px;color:var(--soft);line-height:1.6;}
 .ty{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--soft);margin-top:16px;padding-bottom:6px;}
-@media(max-width:430px){.receipt{padding:24px 14px 8px;}h1{font-size:21px;}.g5{grid-template-columns:repeat(3,1fr);}#shareCard{width:290px;}.sticky-bar{padding:10px 14px 12px;margin:0 -14px;}}
+/* popular grid */
+.pop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.pop-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1.5px solid var(--line);border-radius:8px;background:#FFFEFA;cursor:pointer;font-family:'IBM Plex Sans KR';transition:all .12s;width:100%;text-align:center;}
+.pop-card:hover{border-color:#b8b0a0;}
+.pop-card.on{border-color:var(--pen);background:#eef3f7;box-shadow:inset 0 0 0 2px var(--pen);}
+.pop-card img{width:32px;height:32px;border-radius:8px;object-fit:contain;background:#f0eee8;}
+.pop-name{font-size:11.5px;font-weight:600;color:var(--ink);line-height:1.3;}
+.pop-price{font-size:10px;color:var(--soft);font-family:'IBM Plex Mono',monospace;}
+/* simulation */
+.sim-box{background:var(--pen);color:#fff;border-radius:8px;padding:18px;margin-bottom:18px;}
+.sim-title{font-size:13px;opacity:.85;margin-bottom:12px;}
+.sim-row{display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.15);}
+.sim-row:last-of-type{border:none;}
+.sim-row.hl{font-weight:700;font-size:16px;margin-top:4px;}
+.sim-lbl{opacity:.85;}
+.sim-val{font-weight:600;}
+.sim-comment{font-size:12px;opacity:.8;margin-top:12px;text-align:center;border-top:1px solid rgba(255,255,255,.15);padding-top:10px;}
+/* keep list */
+.keep-item{background:#FFFEFA;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:5px;padding:12px 14px;margin-bottom:8px;}
+.keep-name{font-weight:600;font-size:14px;margin-bottom:4px;}
+.keep-reason{font-size:12.5px;color:var(--soft);line-height:1.5;}
+/* trust note */
+.trust-note{font-size:11.5px;color:var(--soft);text-align:center;margin:14px 0 6px;font-style:italic;padding:8px;border:1px dashed var(--line);border-radius:4px;}
+@media(max-width:430px){.receipt{padding:24px 14px 8px;}h1{font-size:21px;}.g5{grid-template-columns:repeat(3,1fr);}#shareCard{width:290px;}.sticky-bar{padding:10px 14px 12px;margin:0 -14px;}.pop-grid{grid-template-columns:repeat(3,1fr);}}
 </style>
 </head>
 <body>
@@ -220,6 +243,10 @@ h1{font-size:24px;line-height:1.3;margin:0 0 8px;font-weight:700;}
     <h1>구독료 계산해보면<br><span class="hl">대부분 충격받습니다</span></h1>
     <p class="sub">내 자동결제, 실제로 얼마 나가고 있는지 확인해보세요.</p>
     <div class="barcode"></div>
+
+    <!-- 인기 서비스 빠른 선택 -->
+    <div class="sl">🔥 인기 서비스 — 탭하면 바로 추가돼요</div>
+    <div class="pop-grid" id="popularGrid"></div>
 
     <!-- 고정 요약 바 -->
     <div class="sticky-bar" id="stickyBar">
@@ -269,6 +296,15 @@ h1{font-size:24px;line-height:1.3;margin:0 0 8px;font-weight:700;}
 
     <div class="sl m">🚨 해지 우선순위 TOP 3</div>
     <div class="term-list" id="termList"></div>
+
+    <!-- 3년 누적 시뮬레이션 -->
+    <div id="simArea"></div>
+
+    <!-- 유지 추천 -->
+    <div class="sl m">✅ 이건 유지하세요</div>
+    <div id="keepList"></div>
+
+    <div class="trust-note">💬 절약 금액 기준으로 먼저 보여드려요. 광고 여부와 관계없이요.</div>
 
     <div class="sl m">💸 이렇게 하면 더 싸게</div>
     <div class="plan-box plan-cheap">
@@ -492,6 +528,9 @@ const TYPES={
 const CAT_MAP={ott:['netflix','coupangplay','tving','disney','wavve','watcha','laftel','appletv','uplustv'],sports:['spotv','coupangsports'],music:['ytmusic','melon','spotify','genie','flo','vibe','bugs','applemusic'],audiobook:['millie','welaaa','audible'],ebook:['ridi','kyobosam','yes24'],shopping:['coupangwow','naverplus','ssg','tuniverse','kurly'],delivery:['baemin','yogipass','kakaot'],ai:['chatgpt','gemini','claude','perplexity'],cloud:['ms365','googleone','icloud','dropbox','mybox'],design:['canva','adobe'],work:['notion','grammarly'],learn:['longblack','publy','class101','inflearn','fastcampus','duolingo'],game:['xbox','psplus','nso','eaplay','geforce','applearcade','playpass','discord'],vpn:['nordvpn','expressvpn','surfshark'],usd:['appletv','audible','applemusic','chatgpt','gemini','claude','perplexity','notion','grammarly','duolingo','applearcade','playpass','classpass','nordvpn','expressvpn','surfshark','discord'],fitness:['gym','pt','classpass']};
 
 const ANN={spotify:0.17,ytpremium:0.17,duolingo:0.33,notion:0.20,canva:0.23,grammarly:0.50,adobe:0.30,nordvpn:0.58,expressvpn:0.50,surfshark:0.80,ms365:0.17};
+
+// 인기 서비스 목록 (사용자 수 기준, 나중에 Firebase로 자동 업데이트 예정)
+const POPULAR=['netflix','ytpremium','coupangwow','tving','chatgpt','melon','naverplus','disney','spotify','baemin','ms365','claude'];
 const MSGS={friend:['친구야 돈 좀 아껴서 밥 좀 사줘라','야 너는 얼마 나오냐? 나 충격받음','구독 끊고 같이 밥이나 먹자'],parents:['엄마, 아빠 돈 빠져나가. 빨리 해봐','부모님, 이거 모르면 손해예요','자녀를 위해 구독 정리해주세요 🙏'],self:['이걸 이제야 알았다니...','커피 끊기 전에 구독 먼저 끊자','반성합니다. 바로 정리합니다']};
 const PRESETS=[
   {n:'직장인 기본',e:'💼',comment:'직장인이 가장 많이 구독하는 조합이에요',svcs:['netflix','ytpremium','coupangwow','chatgpt','ms365'],tiers:{netflix:1,ytpremium:0,chatgpt:1}},
@@ -602,6 +641,11 @@ function buildCatalog(){
   });
 }
 
+function refreshPopularCard(id){
+  const pc=document.querySelector(`.pop-card[data-pid="${id}"]`);
+  if(pc) pc.classList.toggle('on',ST[id].on);
+}
+
 function toggleSvc(id){
   const s=ST[id];s.on=!s.on;
   const card=document.querySelector(`[data-id="${id}"]`);
@@ -609,6 +653,7 @@ function toggleSvc(id){
   refreshTag(id);
   if(id==='ytpremium')refreshTag('ytmusic');
   if(id==='coupangwow')refreshTag('coupangplay');
+  refreshPopularCard(id);
   updateCatCount(id);updateStickyBar();
   document.getElementById('goS2').disabled=selCount()===0;
 }
@@ -621,6 +666,67 @@ function updateCatCount(id){
       d.querySelector('[data-csc]').textContent=n?n+'개 선택 · ':'';
     }
   }
+}
+
+// 인기 서비스 그리드
+function buildPopularGrid(){
+  const el=document.getElementById('popularGrid');
+  POPULAR.forEach(id=>{
+    const it=byId(id);if(!it)return;
+    const d=DOMAINS[id]||'google.com';
+    const s=ST[id];
+    const price=it.manual?'직접입력':(it.usd?`$${s.price}`:won(s.price));
+    const btn=document.createElement('button');
+    btn.className='pop-card';btn.dataset.pid=id;
+    btn.innerHTML=`<img src="${fav(d)}" onerror="this.style.display='none'"><span class="pop-name">${it.n}</span><span class="pop-price">${price}</span>`;
+    btn.addEventListener('click',()=>{
+      toggleSvc(id);
+      // 해당 카테고리 자동 펼치기
+      CAT.forEach((c,ci)=>{
+        if(c.items.some(i=>i.id===id)){
+          const div=document.querySelector(`[data-ci="${ci}"]`);
+          if(div&&ST[id].on) div.classList.add('op');
+        }
+      });
+    });
+    el.appendChild(btn);
+  });
+}
+
+// 유지 추천 목록
+function calcKeepList(ids){
+  const on=id=>ids.includes(id);const list=[];
+  if(on('coupangwow')) list.push({n:'쿠팡 와우',reason:'쇼핑 무료배송·반품·쿠팡플레이·무료배달까지 한 번에 해결돼요. 쿠팡을 자주 쓴다면 가성비가 가장 높아요.'});
+  if(on('naverplus')) list.push({n:'네이버플러스 멤버십',reason:'월 4,900원에 쇼핑 적립·클라우드 30GB·스포티파이 번들까지. 네이버 쇼핑을 자주 한다면 비용 대비 효과가 높아요.'});
+  if(on('netflix')) list.push({n:'넷플릭스',reason:'OTT를 하나만 유지한다면 여전히 넷플릭스가 가장 합리적이에요. 오리지널 콘텐츠 보유량과 사용시간 점유율 1위예요.'});
+  if(on('ytpremium')) list.push({n:'유튜브 프리미엄',reason:'유튜브를 하루 1시간 이상 본다면 광고 제거만으로도 충분히 값어치해요. 프리미엄 등급은 음악까지 포함이에요.'});
+  if(on('chatgpt')&&ST.chatgpt.price>=20) list.push({n:'ChatGPT Plus 이상',reason:'업무에 AI를 매일 쓴다면 생산성 차이가 크게 나요. 실제로 자주 쓰고 있다면 유지 가치가 높아요.'});
+  if(on('ms365')) list.push({n:'Microsoft 365',reason:'워드·엑셀·PPT + 1TB 클라우드까지 포함이에요. 오피스를 업무에 쓴다면 개별 구매보다 훨씬 저렴해요.'});
+  if(list.length===0) list.push({n:'현재 구독 조합',reason:'특별히 중복이나 낭비 요소가 보이지 않아요. 각 서비스를 실제로 잘 쓰고 있다면 지금 조합이 적당해요.'});
+  return list.slice(0,3);
+}
+
+// 3년 누적 시뮬레이션
+function getSim3YrComment(yr3){
+  if(yr3>=5000000)return'유럽 여행 왕복 항공권이에요 ✈️';
+  if(yr3>=3000000)return'중고 맥북을 살 수 있어요 💻';
+  if(yr3>=2000000)return'갤럭시 S 시리즈 한 대 값이에요 📱';
+  if(yr3>=1000000)return'제주도 2박 3일 여행 경비예요 🌊';
+  if(yr3>=500000)return'에어팟 한 개 값이에요 🎧';
+  return`치킨 ${Math.floor(yr3/22000)}마리예요 🍗`;
+}
+function buildSim(terms){
+  const monthlySaving=terms.reduce((s,t)=>s+(t.saving||0),0);
+  if(monthlySaving<=0)return'';
+  const yr1=monthlySaving*12,yr3=monthlySaving*36;
+  return`<div class="sl m">💡 해지하면 이만큼 아껴요</div>
+  <div class="sim-box">
+    <div class="sim-title">해지 우선순위 TOP 3를 정리하면</div>
+    <div class="sim-row"><span class="sim-lbl">월 절약</span><span class="sim-val">${won(monthlySaving)}</span></div>
+    <div class="sim-row"><span class="sim-lbl">1년 누적</span><span class="sim-val">${won(yr1)}</span></div>
+    <div class="sim-row hl"><span class="sim-lbl">3년 누적</span><span class="sim-val">${won(yr3)}</span></div>
+    <div class="sim-comment">${getSim3YrComment(yr3)}</div>
+  </div>`;
 }
 
 // PRESETS
@@ -790,6 +896,18 @@ function showStep2(){
     tl.appendChild(div);
   });
 
+  // 3년 시뮬레이션
+  document.getElementById('simArea').innerHTML=buildSim(terms);
+
+  // 유지 추천
+  const keeps=calcKeepList(ids);
+  const kl=document.getElementById('keepList');kl.innerHTML='';
+  keeps.forEach(k=>{
+    const div=document.createElement('div');div.className='keep-item';
+    div.innerHTML=`<div class="keep-name">✅ ${k.n}</div><div class="keep-reason">${k.reason}</div>`;
+    kl.appendChild(div);
+  });
+
   // plans
   buildPlans(ids,m,y);
 
@@ -872,7 +990,7 @@ document.getElementById('downloadBtn').addEventListener('click',async()=>{
 document.getElementById('repBtn').addEventListener('click',()=>{if(FORM_URL)window.open(FORM_URL,'_blank','noopener');});
 
 // INIT
-buildCatalog();buildPresets();
+buildCatalog();buildPresets();buildPopularGrid();
 </script>
 </body>
 </html>
